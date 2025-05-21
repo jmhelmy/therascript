@@ -1,0 +1,51 @@
+{
+  "hosting": {
+    "source": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "frameworksBackend": {
+      "region": "us-central1"
+    }
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs20"
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099,
+      "host": "0.0.0.0" // Changed from 127.0.0.1
+    },
+    "firestore": {
+      "port": 8080,
+      "host": "0.0.0.0" // Changed from 127.0.0.1
+    },
+    "functions": {
+      "port": 5001,
+      "host": "0.0.0.0" // Changed from 127.0.0.1
+    },
+    "storage": {
+      "port": 9199,
+      "host": "0.0.0.0" // Changed from 127.0.0.1
+    },
+    "hosting": { // You can change this too for consistency if you use the hosting emulator
+      "port": 5000,
+      "host": "0.0.0.0"
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000,
+      "host": "0.0.0.0" // Changed from 127.0.0.1
+    }
+  }
+}

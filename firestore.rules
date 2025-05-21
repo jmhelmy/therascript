@@ -1,0 +1,69 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Rules for the 'therapySessionNotes' collection
+    // Each note document is expected to have a 'therapistId' field storing the UID of the therapist who owns it.
+    match /therapySessionNotes/{noteId} {
+      // Allow a user to create a note if:
+      // 1. They are authenticated.
+      // 2. The 'therapistId' field in the new note data matches their own UID.
+      // (Optional: Add further field validations here for production, e.g., checking data types)
+      allow create: if request.auth != null &&
+                       request.resource.data.therapistId == request.auth.uid &&
+                       request.resource.data.structuredContent is string &&
+                       request.resource.data.sessionDate is timestamp &&
+                       request.resource.data.createdAt is timestamp && // Ensure this is what you intend if client sends it, or rely on serverTimestamp
+                       request.resource.data.originalAudioFileName is string &&
+                       request.resource.data.status is string;
+
+      // Allow a user to read, update, or delete a note if:
+      // 1. They are authenticated.
+      // 2. The 'therapistId' field in the existing note document matches their own UID.
+      allow read, update, delete: if request.auth != null &&
+                                     resource.data.therapistId == request.auth.uid;
+                                     // For robust updates, also ensure therapistId isn't changed:
+                                     // && request.resource.data.therapistId == resource.data.therapistId;
+    }
+
+    // Rules for the 'consentLogs' collection
+    // Each consent log is expected to have a 'therapistId' field.
+    match /consentLogs/{logId} {
+      // Allow an authenticated user (via your Firebase Function) to create a consent log
+      // if the 'therapistId' in the new log matches their own UID.
+      allow create: if request.auth != null &&
+                       request.resource.data.therapistId == request.auth.uid &&
+                       request.resource.data.consentVersion is string &&
+                       request.resource.data.timestamp is timestamp; // Ensure this is a serverTimestamp
+
+      // IMPORTANT: Deny client-side read, update, and delete access to consent logs.
+      allow read, update, delete: if false;
+    }
+
+    // Rules for the 'auditLogs' collection
+    // Each audit log might have a 'therapistId' or 'actorId' field.
+    match /auditLogs/{logId} {
+      // Allow any authenticated user (which includes your Firebase Functions when they act
+      // on behalf of a user or as a system process) to create audit logs.
+      // Ensure logs written by functions contain necessary identifying info.
+      allow create: if request.auth != null &&
+                       request.resource.data.action is string &&
+                       request.resource.data.timestamp is timestamp &&
+                       request.resource.data.userId == request.auth.uid; // Ensure user ID is logged correctly
+
+      // IMPORTANT: Deny client-side read, update, and delete access to audit logs.
+      allow read, update, delete: if false;
+    }
+
+    // Default deny all access to any other unspecified collections.
+    // This catch-all should be functionally covered if every other path is explicitly denied reads/writes
+    // or if the above matches are the only collections you intend client-side interaction with.
+    // If you add more collections that clients need to access, add specific rules for them.
+    // If this is the last rule in the "match /databases/{database}/documents" block, it's a good final deny.
+    // To be absolutely explicit for any other top-level collection not defined above:
+    match /{otherCollection}/{docId} {
+        allow read, write: if false;
+    }
+  }
+}
