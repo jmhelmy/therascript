@@ -1,0 +1,107 @@
+.
+├── README.md
+├── eslint.config.mjs
+├── file_structure.txt
+├── firebase-debug.log
+├── firebase.json
+├── firestore-debug.log
+├── firestore.indexes.json
+├── firestore.rules
+├── folder_structure.txt
+├── functions
+│   ├── firestore-debug.log
+│   ├── lib
+│   │   ├── adminFirebase.ts
+│   │   ├── adminSdk.js
+│   │   ├── common
+│   │   │   └── adminSdk.js
+│   │   ├── generateNote.js
+│   │   ├── index.js
+│   │   ├── logClientConsent.js
+│   │   ├── services
+│   │   │   ├── azureOpenAIService.js
+│   │   │   ├── azureSpeech.js
+│   │   │   ├── azureSpeechService.js
+│   │   │   ├── firestoreService.js
+│   │   │   ├── storage.js
+│   │   │   └── transcoder.js
+│   │   ├── types.js
+│   │   └── utils
+│   │       └── authenticate.js
+│   ├── lib_file_structure.txt
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── src
+│   │   ├── common
+│   │   │   └── adminSdk.ts
+│   │   ├── generateNote.ts
+│   │   ├── index.ts
+│   │   ├── logClientConsent.ts
+│   │   ├── services
+│   │   │   ├── azureOpenAIService.ts
+│   │   │   ├── azureSpeech.ts
+│   │   │   ├── azureSpeechService.ts
+│   │   │   ├── firestoreService.ts
+│   │   │   ├── storage.ts
+│   │   │   └── transcoder.ts
+│   │   ├── types.ts
+│   │   └── utils
+│   │       └── authenticate.ts
+│   ├── src_file_structure.txt
+│   └── tsconfig.json
+├── lib
+│   └── auth.ts
+├── next-env.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── public
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── manifest.json
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── src
+│   ├── app
+│   │   ├── account
+│   │   │   └── page.tsx
+│   │   ├── consent
+│   │   │   └── page.tsx
+│   │   ├── dashboard
+│   │   │   └── page.tsx
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── login
+│   │   │   └── page.tsx
+│   │   ├── not-found.tsx
+│   │   ├── notes
+│   │   │   └── [noteId]
+│   │   │       ├── error.tsx
+│   │   │       └── page.tsx
+│   │   ├── page.tsx
+│   │   ├── register
+│   │   │   └── page.tsx
+│   │   └── session
+│   │       └── record
+│   │           └── page.tsx
+│   ├── components
+│   │   ├── NoteCard.tsx
+│   │   └── TopNav.tsx
+│   ├── firebase
+│   │   └── saveTherapySessionNote.ts
+│   ├── hooks
+│   │   ├── useAudioProcessor.ts
+│   │   └── useAudioRecorder.ts
+│   ├── lib
+│   │   ├── auth.ts
+│   │   ├── firebaseConfig.ts
+│   │   └── firestore.ts
+│   └── styles
+│       └── globals.css
+├── storage.cors.json
+├── storage.rules
+└── tsconfig.json
+
+28 directories, 77 files

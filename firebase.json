@@ -1,51 +1,65 @@
 {
   "hosting": {
-    "source": ".",
+    "source": ".", 
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
     "frameworksBackend": {
-      "region": "us-central1"
+      "region": "us-central1" 
     }
   },
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs20"
-  },
+  "functions": [ 
+    {
+      "source": "functions", 
+      "runtime": "nodejs20", 
+      "codebase": "default" 
+    }
+  ],
   "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
+    "rules": "firestore.rules", 
+    "indexes": "firestore.indexes.json" 
   },
   "storage": {
-    "rules": "storage.rules"
+    "rules": "storage.rules" 
   },
   "emulators": {
     "auth": {
       "port": 9099,
-      "host": "0.0.0.0" // Changed from 127.0.0.1
+      "host": "0.0.0.0" 
     },
     "firestore": {
       "port": 8080,
-      "host": "0.0.0.0" // Changed from 127.0.0.1
+      "host": "0.0.0.0" 
     },
     "functions": {
       "port": 5001,
-      "host": "0.0.0.0" // Changed from 127.0.0.1
+      "host": "0.0.0.0" 
     },
     "storage": {
       "port": 9199,
-      "host": "0.0.0.0" // Changed from 127.0.0.1
+      "host": "0.0.0.0" 
     },
-    "hosting": { // You can change this too for consistency if you use the hosting emulator
-      "port": 5000,
-      "host": "0.0.0.0"
+    "hosting": {
+      // Port 5000 is taken by macOS Control Center, so we disable the hosting emulator for now.
+      // You can change the port to something like 5002 if you need the hosting emulator later:
+      // "port": 5002,
+      // "host": "0.0.0.0" 
+      "enabled": false   // <-- HOSTING EMULATOR IS DISABLED
     },
     "ui": {
-      "enabled": true,
-      "port": 4000,
-      "host": "0.0.0.0" // Changed from 127.0.0.1
+      "enabled": true, 
+      "port": 4000,    
+      "host": "0.0.0.0" 
+    },
+    "hub": { 
+      "port": 4400,    
+      "host": "0.0.0.0" 
+    },
+    "logging": { 
+        "port": 4500, 
+        "host": "0.0.0.0" 
     }
   }
 }

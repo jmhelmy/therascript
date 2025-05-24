@@ -16,73 +16,96 @@ export const useAudioRecorder = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
+      console.log("useAudioRecorder: Stream cleaned up."); // Optional: log cleanup
     }
     if (recordingIntervalRef.current) {
       clearInterval(recordingIntervalRef.current);
       recordingIntervalRef.current = null;
     }
-    setRecordingDuration(0);
+    // setRecordingDuration(0); // Usually reset when starting a new recording
   }, []);
 
-  // Ensure stream is cleaned up on hook unmount if still active
   useEffect(() => {
+    // Cleanup on unmount
     return () => {
       cleanupStream();
     };
   }, [cleanupStream]);
 
   const startRecording = async () => {
-    if (isRecording) return;
+    console.log("useAudioRecorder: startRecording called"); // DEBUG LOG
+    if (isRecording) {
+      console.log("useAudioRecorder: Already recording, returning.");
+      return;
+    }
 
-    setAudioBlob(null);
+    setAudioBlob(null); // Clear previous blob
     setStatusMessage('Requesting microphone permission...');
     try {
       streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
       setStatusMessage('Microphone access granted. Starting recording...');
-
-      mediaRecorderRef.current = new MediaRecorder(streamRef.current, { mimeType: 'audio/webm; codecs=opus' });
+      console.log("useAudioRecorder: Microphone access granted.");
+    
+      // Let the browser choose the supported mimeType
+      mediaRecorderRef.current = new MediaRecorder(streamRef.current); 
+      console.log("useAudioRecorder: MediaRecorder started with mimeType:", mediaRecorderRef.current.mimeType); // Log what Safari chose
+    
       audioChunksRef.current = [];
-
+    
       mediaRecorderRef.current.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
         }
       };
-
+    
       mediaRecorderRef.current.onstop = () => {
-        const completeBlob = new Blob(audioChunksRef.current, { type: 'audio/webm; codecs=opus' });
+        console.log("useAudioRecorder: mediaRecorder.onstop called");
+        // Use the mimeType the recorder actually used
+        const recordedMimeType = mediaRecorderRef.current?.mimeType || 'audio/mp4'; // Fallback if needed
+        const completeBlob = new Blob(audioChunksRef.current, { type: recordedMimeType });
         setAudioBlob(completeBlob);
         setIsRecording(false);
-        setStatusMessage('Recording stopped. Ready to process.');
-        cleanupStream();
-      };
-
-      mediaRecorderRef.current.onerror = (event) => {
-        console.error('MediaRecorder error:', event);
-        setStatusMessage('Error during recording. Please try again.');
-        setIsRecording(false);
+        setStatusMessage('Recording stopped. Ready to process or record again.');
         cleanupStream();
       };
 
       mediaRecorderRef.current.start();
       setIsRecording(true);
-      setRecordingDuration(0);
+      setRecordingDuration(0); // Reset duration
       setStatusMessage('Recording...');
+      console.log("useAudioRecorder: Recording started.");
+      
       recordingIntervalRef.current = setInterval(() => {
         setRecordingDuration(prev => prev + 1);
       }, 1000);
+
     } catch (err) {
-      console.error('Error accessing microphone:', err);
-      setStatusMessage('Could not access microphone. Please ensure permission is granted and try again.');
-      cleanupStream();
+      console.error('useAudioRecorder: Error accessing microphone:', err);
+      let message = 'Could not access microphone. Please ensure permission is granted and try again.';
+      if (err instanceof Error && err.name === 'NotAllowedError') {
+        message = 'Microphone permission was denied. Please enable it in your browser settings.';
+      } else if (err instanceof Error && err.name === 'NotFoundError') {
+        message = 'No microphone found. Please ensure a microphone is connected and enabled.';
+      }
+      setStatusMessage(message);
+      cleanupStream(); // Ensure cleanup on error
     }
   };
 
   const stopRecording = () => {
+    console.log("useAudioRecorder: stopRecording called"); // DEBUG LOG
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop(); // onstop handler will do the rest
-    } else if (recordingIntervalRef.current) { // Safety clear if somehow recording state is off but interval is running
-        clearInterval(recordingIntervalRef.current)
+      mediaRecorderRef.current.stop(); // onstop handler will set isRecording to false and cleanup
+      console.log("useAudioRecorder: mediaRecorder.stop() issued.");
+    } else {
+      console.log("useAudioRecorder: stopRecording called but no active recording or mediaRecorder.");
+      // If recording was already stopped or didn't start, ensure interval is cleared
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+      setIsRecording(false); // Ensure state is consistent
+      setRecordingDuration(0);
     }
   };
 
@@ -91,7 +114,7 @@ export const useAudioRecorder = () => {
     recordingDuration,
     audioBlob,
     statusMessage,
-    setStatusMessage, // Expose setter if external components need to update it
+    setStatusMessage,
     startRecording,
     stopRecording,
   };

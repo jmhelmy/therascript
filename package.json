@@ -3,20 +3,26 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "firebase": "^11.7.3",
+    "firebase-admin": "^13.4.0",
     "next": "^15.4.0-canary.42",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "openai": "^4.103.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
