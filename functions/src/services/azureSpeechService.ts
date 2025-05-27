@@ -3,22 +3,18 @@
 import * as functions from "firebase-functions/v1";
 import * as SpeechSDK from "microsoft-cognitiveservices-speech-sdk";
 
-/**
- * Transcribes a PCM buffer (16 kHz, mono, s16le) via Azure Speech SDK in one shot.
- */
+const speechCfg = functions.config().azure?.speech || {};
+functions.logger.info("Azure Speech Config:", speechCfg);
+
+if (!speechCfg.key || !speechCfg.region) {
+  functions.logger.error("Missing Azure Speech config:", speechCfg);
+  throw new Error("Azure Speech service not configured.");
+}
+
+// your existing transcription function below, using speechCfg.key & speechCfg.region
 export async function transcribePCMWithAzure(pcmBuffer: Buffer): Promise<string> {
-  const key = functions.config().azurespeech?.key;
-  const region = functions.config().azurespeech?.region;
-  if (!key || !region) {
-    functions.logger.error("Azure Speech SDK credentials not configured.");
-    throw new Error("Azure Speech service not configured.");
-  }
-
-  functions.logger.info("AzureSpeech: Beginning single‐shot transcription", {
-    bufferLength: pcmBuffer.length,
-  });
-
-  // Configure the Speech SDK
+  const { key, region } = speechCfg;
+  functions.logger.info("AzureSpeech: Beginning transcription, bufferLength=", pcmBuffer.length);
   const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(key, region);
   speechConfig.speechRecognitionLanguage = "en-US";
 

@@ -1,65 +1,43 @@
 {
   "hosting": {
-    "source": ".", 
+    "public": "public",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
-    ],
-    "frameworksBackend": {
-      "region": "us-central1" 
-    }
+    ]
   },
-  "functions": [ 
-    {
-      "source": "functions", 
-      "runtime": "nodejs20", 
-      "codebase": "default" 
-    }
-  ],
+  "functions": {
+    "source": "functions"
+  },
   "firestore": {
-    "rules": "firestore.rules", 
-    "indexes": "firestore.indexes.json" 
+    "rules": "firestore.rules"
   },
   "storage": {
-    "rules": "storage.rules" 
+    "rules": "storage.rules"
   },
   "emulators": {
     "auth": {
-      "port": 9099,
-      "host": "0.0.0.0" 
-    },
-    "firestore": {
-      "port": 8080,
-      "host": "0.0.0.0" 
+      "port": 9099
     },
     "functions": {
-      "port": 5001,
-      "host": "0.0.0.0" 
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080
     },
     "storage": {
-      "port": 9199,
-      "host": "0.0.0.0" 
+      "port": 9199
     },
-    "hosting": {
-      // Port 5000 is taken by macOS Control Center, so we disable the hosting emulator for now.
-      // You can change the port to something like 5002 if you need the hosting emulator later:
-      // "port": 5002,
-      // "host": "0.0.0.0" 
-      "enabled": false   // <-- HOSTING EMULATOR IS DISABLED
+    "extensions": {
+      "port": 9190
     },
     "ui": {
-      "enabled": true, 
-      "port": 4000,    
-      "host": "0.0.0.0" 
+      "enabled": true,
+      "port": 4000
     },
-    "hub": { 
-      "port": 4400,    
-      "host": "0.0.0.0" 
-    },
-    "logging": { 
-        "port": 4500, 
-        "host": "0.0.0.0" 
+    "hosting": {
+      "enabled": false
     }
   }
 }
