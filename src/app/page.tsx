@@ -1,107 +1,162 @@
-// src/app/page.tsx
 import Image from "next/image";
 import Link from "next/link";
-import styles from "./HomePage.module.css"; // Import the CSS Module
+import styles from "./HomePage.module.css";
 
-// Example SVG Icons (replace with your actual icons or a library)
+// --- NEW & REFINED ICONS ---
+
 const ShieldCheckIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-    <path fillRule="evenodd" d="M12.001 2.25c3.865 0 7.136 2.205 8.726 5.363.24.48.317.95.329 1.378A12.75 12.75 0 0 1 12.001 21V2.25Zm0 0c-3.865 0-7.136 2.205-8.726 5.363A12.756 12.756 0 0 0 3.26 8.99c-.013-.428.088-.898.33-1.378C5.186 4.456 8.456 2.25 12.001 2.25Zm10.5 6.5H1.5a11.252 11.252 0 0 0 10.5 11.25 11.252 11.252 0 0 0 10.5-11.25Z" clipRule="evenodd" />
-  </svg>
-);
-const BoltIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10">
-    <path fillRule="evenodd" d="M11.002 2.996a.75.75 0 0 1 .746.649l1.265 6.667A.75.75 0 0 1 12.25 11h-1.5a.75.75 0 0 0-.744.53l-1.275 6.787a.75.75 0 0 1-1.416-.265l1.274-6.787A.75.75 0 0 1 10.75 11h1.5a.75.75 0 0 0 .745-.65l-1.263-6.667a.75.75 0 0 1-.73-.683Z" clipRule="evenodd" />
-    <path fillRule="evenodd" d="M13.697 2.819a.75.75 0 0 1 1.02.27l6.188 8.25a.75.75 0 0 1-.51 1.161h-3.644a.75.75 0 0 0-.704.478l-2.843 5.686a.75.75 0 0 1-1.336 0l-2.843-5.686A.75.75 0 0 0 8.126 12.5H4.482a.75.75 0 0 1-.51-1.161l6.188-8.25a.75.75 0 0 1 1.02-.27ZM13.5 6.061 9.75 11h3.374a2.25 2.25 0 0 1 2.112 1.434l1.5 3 3.75-5H16.5a.75.75 0 0 0-.679.428L13.5 6.06Z" clipRule="evenodd" />
-  </svg>
-);
-const DocumentTextIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10">
-    <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a.375.375 0 0 1-.375-.375V6.75A3.75 3.75 0 0 0 9 3H5.625Zm.375 13.5a.75.75 0 0 0 0 1.5h8.25a.75.75 0 0 0 0-1.5H6Zm0 3a.75.75 0 0 0 0 1.5h8.25a.75.75 0 0 0 0-1.5H6Z" />
-    <path d="M12.971 1.816A5.23 5.23 0 0 1 15.75 1.5h1.875c.414 0 .75.336.75.75v4.5c0 .414-.336.75-.75.75h-4.5a.75.75 0 0 1-.75-.75V2.25c0-.204.082-.394.221-.534ZM15 4.5h1.5V3H15v1.5Z" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={styles.icon}>
+    <path fillRule="evenodd" d="M10 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 1ZM8.855 4.03a.75.75 0 0 0-1.06 1.06l.955.955a.75.75 0 0 0 1.06-1.06l-.955-.955ZM12.215 5.09a.75.75 0 0 0-1.06-1.06l-.955.955a.75.75 0 1 0 1.06 1.06l.955-.955ZM10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12ZM13.5 10a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clipRule="evenodd" />
   </svg>
 );
 
+const SparklesIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={styles.icon}>
+    <path d="M10.001 3.5c.343 0 .683.023 1.018.068a.75.75 0 0 1 .613.843l-1.34 6.7a.75.75 0 0 1-1.46-.292l1.34-6.7a.75.75 0 0 1 .829-.619Zm-2.29 2.132a.75.75 0 0 1 .649-.191l6.192 2.477a.75.75 0 0 1 .39 1.03l-3.32 6.64a.75.75 0 0 1-1.28-.64l3.32-6.64a.75.75 0 0 1-.39-1.03l-6.192-2.477a.75.75 0 0 1-.192-.649Zm-3.837 3.232a.75.75 0 0 1 .843.613l-1.34 6.7a.75.75 0 0 1-1.46-.292l1.34-6.7a.75.75 0 0 1 .617-.843Zm11.162 2.336a.75.75 0 0 1 .39 1.03l-3.32 6.64a.75.75 0 0 1-1.28-.64l3.32-6.64a.75.75 0 0 1 .89-.39Z" />
+  </svg>
+);
+
+const DocumentTextIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={styles.icon}>
+    <path fillRule="evenodd" d="M4.25 5.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm0 3.5a.75.75 0 0 0 0 1.5h3.5a.75.75 0 0 0 0-1.5h-3.5Z" clipRule="evenodd" />
+    <path d="M3 2.5a2.5 2.5 0 0 1 2.5-2.5h5.879a2.5 2.5 0 0 1 1.767.732l2.622 2.622a2.5 2.5 0 0 1 .732 1.767V15A2.5 2.5 0 0 1 14 17.5h-3.5a.75.75 0 0 1 0-1.5H14a1 1 0 0 0 1-1V7.621a1 1 0 0 0-.293-.707l-2.621-2.622A1 1 0 0 0 11.379 4H5.5a1 1 0 0 0-1 1v9.5a.75.75 0 0 1-1.5 0V5.5A2.5 2.5 0 0 1 3 2.5Z" />
+  </svg>
+);
 
 export default function HomePage() {
   return (
     <div className={styles.pageContainer}>
-      {/* Header */}
+      {/* --- HEADER --- */}
       <header className={styles.header}>
         <Link href="/" className={styles.logo}>
           TheraScript
         </Link>
         <nav className={styles.navLinks}>
-          <Link href="/login" className={`${styles.navButton} ${styles.navButtonSecondary}`}>
+          <Link href="/login" className={styles.navButtonSecondary}>
             Log In
           </Link>
-          <Link href="/register" className={styles.navButton}> {/* Assuming /register is your signup page */}
-            Sign Up
+          <Link href="/register" className={styles.navButton}>
+            Sign Up Free
           </Link>
         </nav>
       </header>
 
-      {/* Hero Section */}
+      {/* --- HERO SECTION --- */}
       <section className={styles.heroSection}>
-        <div className={styles.hipaaBadge}>
-            <ShieldCheckIcon />
-            <span>HIPAA-Compliant AI Assistance</span>
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>
+            Your AI Partner in Clinical Excellence
+          </h1>
+          <p className={styles.heroSubtitle}>
+            TheraScript goes beyond automated notes. We provide secure, AI-powered tools to streamline your documentation and offer clinical insights, giving you more time and confidence to focus on what matters most—your clients.
+          </p>
+          <div className={styles.ctaButtons}>
+            <Link href="/register" className={styles.ctaButtonPrimary}>
+              Start Your Free Trial
+            </Link>
+            <Link href="#features" className={styles.ctaButtonSecondary}>
+              Explore Features
+            </Link>
+          </div>
+          <p className={styles.hipaaText}><ShieldCheckIcon /> End-to-End HIPAA-Compliant</p>
         </div>
-        <h1 className={styles.heroTitle}>
-          Focus on Your Clients, Not Your Notes.
-        </h1>
-        <p className={styles.heroSubtitle}>
-          TheraScript uses advanced AI to securely transcribe your therapy sessions 
-          and generate accurate clinical notes, saving you hours each week.
-        </p>
-        <div className={styles.heroImage}>
-          {/* You can add a relevant hero image or illustration here if you have one */}
-          {/* Example: <Image src="/hero-illustration.svg" alt="AI powered therapy notes" width={500} height={300} priority /> */}
-        </div>
-        <div className={styles.ctaButtons}>
-          <Link href="/register" className={styles.ctaButtonPrimary}>
-            Get Started for Free
-          </Link>
-          <Link href="/#features" className={styles.ctaButtonSecondary}> {/* Link to features section below */}
-            Learn More
-          </Link>
+        <div className={styles.heroImageContainer}>
+          <Image 
+            src="https://images.pexels.com/photos/7176319/pexels-photo-7176319.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
+            alt="A calm and professional therapy office environment"
+            width={600}
+            height={750}
+            className={styles.heroImage}
+            priority
+          />
         </div>
       </section>
 
-      {/* Features Section (Example) */}
+      {/* --- FEATURES SECTION --- */}
       <section id="features" className={styles.featuresSection}>
-        <h2 className={styles.featuresTitle}>How TheraScript Empowers You</h2>
+        <div className={styles.sectionHeader}>
+          <span className={styles.pill}>Core Features</span>
+          <h2>A Smarter, More Supportive Practice</h2>
+          <p>TheraScript is built on two pillars: unparalleled efficiency and dedicated clinical support.</p>
+        </div>
         <div className={styles.featuresGrid}>
+          {/* Feature 1: Notes */}
           <div className={styles.featureCard}>
-            <div className={styles.featureIcon}><BoltIcon /></div>
-            <h3 className={styles.featureTitle}>Instant Transcription</h3>
-            <p className={styles.featureDescription}>
-              Securely record your sessions and get accurate, timestamped transcripts in minutes.
-            </p>
+            <div className={styles.featureIconWrapper}><DocumentTextIcon /></div>
+            <h3>Effortless Documentation</h3>
+            <p>Transform your sessions into perfectly structured SOAP notes in minutes. Our AI accurately captures subjective and objective details, letting you reclaim hours of administrative time each week.</p>
           </div>
+          {/* Feature 2: Advisor */}
           <div className={styles.featureCard}>
-            <div className={styles.featureIcon}><DocumentTextIcon /></div>
-            <h3 className={styles.featureTitle}>AI-Generated SOAP Notes</h3>
-            <p className={styles.featureDescription}>
-              Our AI crafts detailed and compliant SOAP notes, ready for your review and approval.
-            </p>
+            <div className={styles.featureIconWrapper}><SparklesIcon /></div>
+            <h3>Your AI Clinical Advisor</h3>
+            <p>Gain a confidential second opinion. Our AI analyzes session context to suggest evidence-based interventions, identify potential patterns, and provide encouragement to enhance your clinical judgment.</p>
           </div>
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}><ShieldCheckIcon /></div>
-            <h3 className={styles.featureTitle}>HIPAA-Compliant Security</h3>
-            <p className={styles.featureDescription}>
-              Built with security and privacy at its core to meet HIPAA standards for PHI.
-            </p>
+        </div>
+      </section>
+      
+      {/* --- HOW IT WORKS SECTION --- */}
+      <section className={styles.howItWorksSection}>
+        <div className={styles.sectionHeader}>
+          <span className={styles.pill}>How It Works</span>
+          <h2>Get Started in 3 Simple Steps</h2>
+        </div>
+        <div className={styles.howItWorksGrid}>
+          <div className={styles.stepCard}>
+            <div className={styles.stepNumber}>1</div>
+            <h4>Record Securely</h4>
+            <p>Conduct your session while our end-to-end encrypted tool captures the conversation.</p>
+          </div>
+          <div className={styles.stepCard}>
+            <div className={styles.stepNumber}>2</div>
+            <h4>Generate & Review</h4>
+            <p>With one click, receive a draft SOAP note and a summary of clinical insights.</p>
+          </div>
+          <div className={styles.stepCard}>
+            <div className={styles.stepNumber}>3</div>
+            <h4>Finalize & File</h4>
+            <p>Make any edits, approve the final note, and seamlessly integrate it into your records.</p>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
+      {/* --- TESTIMONIAL / SOCIAL PROOF SECTION --- */}
+      <section className={styles.testimonialSection}>
+        <div className={styles.testimonialContent}>
+          <Image 
+            src="https://images.pexels.com/photos/3760855/pexels-photo-3760855.jpeg?auto=compress&cs=tinysrgb&w=800"
+            alt="Headshot of a smiling therapist"
+            width={80}
+            height={80}
+            className={styles.testimonialAvatar}
+          />
+          <blockquote>
+            “TheraScript has been a game-changer. The AI advisor feels like having a seasoned supervisor on call, and the time I've saved on notes is just incredible. I feel more present with my clients and more confident in my practice.”
+          </blockquote>
+          <cite>Dr. Alisha Chen, PhD, LMFT</cite>
+        </div>
+      </section>
+      
+      {/* --- FINAL CTA SECTION --- */}
+      <section className={styles.finalCtaSection}>
+        <h2>Ready to Transform Your Practice?</h2>
+        <p>Join hundreds of therapists who are saving time, reducing burnout, and enhancing their clinical skills with TheraScript.</p>
+        <Link href="/register" className={styles.ctaButtonPrimary}>
+          Sign Up and Start Your Free Trial Today
+        </Link>
+      </section>
+
+      {/* --- FOOTER --- */}
       <footer className={styles.footer}>
-        <p>&copy; {new Date().getFullYear()} TheraScript. All rights reserved.</p>
-        <div className={styles.footerLinks}>
-            <Link href="/terms" className={styles.footerLink}>Terms of Service</Link>
-            <Link href="/privacy" className={styles.footerLink}>Privacy Policy</Link>
+        <div className={styles.footerContent}>
+          <p className={styles.logo}>TheraScript</p>
+          <div className={styles.footerLinks}>
+              <Link href="/features" className={styles.footerLink}>Features</Link>
+              <Link href="/pricing" className={styles.footerLink}>Pricing</Link>
+              <Link href="/terms" className={styles.footerLink}>Terms of Service</Link>
+              <Link href="/privacy" className={styles.footerLink}>Privacy Policy</Link>
+          </div>
+          <p className={styles.copyright}>&copy; {new Date().getFullYear()} TheraScript. All rights reserved.</p>
         </div>
       </footer>
     </div>

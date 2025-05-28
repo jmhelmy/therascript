@@ -1,12 +1,20 @@
 /* src/app/globals.css */
 
 :root {
-  --color-primary: #009DA3;
-  --color-bg: #F1F5F9;
+  /* Your Original Variables */
+  --color-primary: #00838f; /* Updated hex to match the design */
+  --color-bg: #f8fafc;       /* Updated hex */
   --color-card: #FFFFFF;
-  --text-dark: #1E293B;
-  --text-medium: #475569;
+  --text-dark: #1f2937;       /* Updated hex */
+  --text-medium: #4b5563;   /* Updated hex */
   --text-light: #64748B;
+  
+  /* Added Variables from the Design */
+  --color-primary-dark: #006064; /* For hover states */
+  --color-border: #e5e7eb;       /* For consistent borders */
+  --color-accent-light: #e0f7fa;   /* For pills and light hovers */
+  
+  /* Your Original Variables */
   --radius: 0.75rem;
   --spacing: 1rem;
   --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -19,9 +27,8 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
-  background: white;
-  color: #111;
-  line-height: 1.5;
-  padding: 2rem;
+  font-family: 'Inter', Arial, sans-serif; /* Added Inter as a preferred font */
+  background-color: var(--color-card);
+  color: var(--text-dark);
+  line-height: 1.6;
 }
