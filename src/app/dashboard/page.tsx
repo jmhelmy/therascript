@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { CaduceusIcon } from '@/components/CaduceusIcon';
+import CaduceusIcon from '@/components/CaduceusIcon';
 import Link from 'next/link';
 import { User as FirebaseUser } from 'firebase/auth';
 import { auth, firestore as db } from '@/lib/firebaseConfig';
@@ -21,12 +21,6 @@ import { NoteCard, NoteCardProps } from '@/components/NoteCard';
 import styles from './DashboardPage.module.css';
 
 interface DisplayNote extends NoteCardProps {}
-
-const CaduceusIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-20 h-20 text-[#009DA3]">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h.008v.008h-.008v-.008zm0 0H20.625a1.125 1.125 0 001.125-1.125V14.25m-17.25 0V6.375c0-.621.504-1.125 1.125-1.125h13.5c.621 0 1.125.504 1.125 1.125v11.25m-17.25 0h17.25M3.375 6.375h17.25M20.625 6.375V3.375c0-.621-.504-1.125-1.125-1.125h-1.5c.621 0-1.125.504-1.125 1.125v3m0 0v1.875m0 0H9.75m0 0v1.875m0 0H12.375m0 0v1.875m0 0h2.625m0 0v1.875M12 13.5v2.625m0 0H9.75M12 16.125H14.25" />
-  </svg>
-);
 
 export default function DashboardPage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);

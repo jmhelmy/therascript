@@ -1,4 +1,17 @@
 /* src/app/globals.css */
+
+:root {
+  --color-primary: #009DA3;
+  --color-bg: #F1F5F9;
+  --color-card: #FFFFFF;
+  --text-dark: #1E293B;
+  --text-medium: #475569;
+  --text-light: #64748B;
+  --radius: 0.75rem;
+  --spacing: 1rem;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
 * {
   margin: 0;
   padding: 0;

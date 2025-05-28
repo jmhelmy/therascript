@@ -1,5 +1,6 @@
+// src/app/session/record/page.tsx
 'use client';
-import styles from './RecordSessionPage.module.css';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -7,10 +8,15 @@ import { User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/lib/firebaseConfig';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useAudioProcessor } from '@/hooks/useAudioProcessor';
+import styles from './RecordSessionPage.module.css';
+import { StatusBanner } from '@/components/session/StatusBanner';
+import { RecordingControls } from '@/components/session/RecordingControls';
+import { AudioReview } from '@/components/session/AudioReview';
+import { ProgressBar } from '@/components/session/ProgressBar';
 
-const RecordSessionPage = () => {
+export default function RecordSessionPage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [authLoading, setAuthLoading] = useState<boolean>(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const router = useRouter();
 
   const {
@@ -33,46 +39,34 @@ const RecordSessionPage = () => {
   const displayStatus = processorStatus || recorderStatus;
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        if (setRecorderStatus) {
-          setRecorderStatus('Redirecting to login...');
-        }
+    const unsubscribe = auth.onAuthStateChanged((u) => {
+      if (u) setUser(u);
+      else {
+        setRecorderStatus?.('Redirecting to login…');
         router.push('/login');
       }
       setAuthLoading(false);
     });
-    return () => unsubscribe();
+    return unsubscribe;
   }, [router, setRecorderStatus]);
 
   const handleProcessAudio = () => {
     if (audioBlob && user) {
-      processAudio(audioBlob, user.uid, (success, message, noteId) => {
+      processAudio(audioBlob, user.uid, (success, _, noteId) => {
         if (success) {
-          setTimeout(() => {
-            if (noteId) {
-              router.push(`/notes/${noteId}`);
-            } else {
-              router.push('/dashboard');
-            }
-          }, 2000);
+          setTimeout(
+            () => router.push(noteId ? `/notes/${noteId}` : '/dashboard'),
+            2_000
+          );
         }
       });
     }
   };
 
-  const formatDuration = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-  };
-
   if (authLoading) {
     return (
       <div className={styles.loadingContainer}>
-        <p className={styles.statusText}>Loading authentication...</p>
+        <p className={styles.statusText}>Loading authentication…</p>
       </div>
     );
   }
@@ -80,7 +74,9 @@ const RecordSessionPage = () => {
   if (!user) {
     return (
       <div className={styles.loadingContainer}>
-        <p className={styles.statusText}>User not authenticated. Redirecting to login...</p>
+        <p className={styles.statusText}>
+          User not authenticated. Redirecting to login…
+        </p>
       </div>
     );
   }
@@ -91,67 +87,29 @@ const RecordSessionPage = () => {
         <div className={styles.headerRow}>
           <h1 className={styles.pageTitle}>Record New Session</h1>
           <Link href="/dashboard" className={styles.backLink}>
-            &larr; Back to Dashboard
+            ← Back to Dashboard
           </Link>
         </div>
 
-        {displayStatus && (
-          <p
-            className={`${styles.statusBox} ${displayStatus.toLowerCase().includes('error') || displayStatus.toLowerCase().includes('failed') ? styles.errorStatus : styles.successStatus}`}
-          >
-            {displayStatus}
-          </p>
-        )}
+        <StatusBanner message={displayStatus} />
+      <RecordingControls
+        isRecording={isRecording}
+        isProcessing={isProcessing}
+        duration={recordingDuration}
+        onStart={startRecording}
+        onStop={stopRecording}
+      />
+      {audioBlob && !isRecording && (
+        <AudioReview
+          audioBlob={audioBlob}
+          isProcessing={isProcessing}
+          uploadProgress={uploadProgress}
+          onProcess={handleProcessAudio}
+        />
+      )}
+      <ProgressBar progress={uploadProgress} />
+    </div>
 
-        <div className={styles.buttonGroup}>
-          {!isRecording ? (
-            <button
-              onClick={startRecording}
-              disabled={isProcessing || isRecording}
-              className={styles.startButton}
-            >
-              Start Recording
-            </button>
-          ) : (
-            <button
-              onClick={stopRecording}
-              disabled={isProcessing}
-              className={styles.stopButton}
-            >
-              Stop Recording
-            </button>
-          )}
-        </div>
-
-        {isRecording && (
-          <p className={styles.timerText}>Recording Time: {formatDuration(recordingDuration)}</p>
-        )}
-
-        {audioBlob && !isRecording && (
-          <div className={styles.reviewSection}>
-            <h2 className={styles.reviewTitle}>Review Audio</h2>
-            <audio controls src={URL.createObjectURL(audioBlob)} className={styles.audioPlayer}></audio>
-            <button
-              onClick={handleProcessAudio}
-              disabled={isProcessing || !audioBlob}
-              className={styles.processButton}
-            >
-              {isProcessing ? `Processing (${Math.round(uploadProgress)}%)...` : 'Process & Generate Note'}
-            </button>
-          </div>
-        )}
-
-        {isProcessing && uploadProgress > 0 && (
-          <div className={styles.progressBarContainer}>
-            <div
-              className={styles.progressBar}
-              style={{ width: `${uploadProgress}%` }}
-            ></div>
-          </div>
-        )}
-      </div>
     </div>
   );
-};
-
-export default RecordSessionPage;
+}
