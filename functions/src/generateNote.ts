@@ -87,3 +87,11 @@ app.post(
 export const generateNoteHttpFunction = functions
   .runWith({ timeoutSeconds: 540, memory: "1GB" })
   .https.onRequest(app);
+
+  await db.collection('auditLogs').add({
+    userId: therapistId,
+    action: 'generateNote',
+    targetId: noteId,
+    timestamp: admin.firestore.FieldValue.serverTimestamp()
+  });
+  

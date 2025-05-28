@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./HomePage.module.css";
+import { useEffect, useState } from "react"; 
 
 // --- NEW & REFINED ICONS ---
 
@@ -154,17 +155,20 @@ export default function HomePage() {
 
       {/* --- FOOTER --- */}
       <footer className={styles.footer}>
-        <div className={styles.footerContent}>
-          <p className={styles.logo}>TheraScript</p>
-          <div className={styles.footerLinks}>
-              <Link href="/features" className={styles.footerLink}>Features</Link>
-              <Link href="/pricing" className={styles.footerLink}>Pricing</Link>
-              <Link href="/terms" className={styles.footerLink}>Terms of Service</Link>
-              <Link href="/privacy" className={styles.footerLink}>Privacy Policy</Link>
-          </div>
-          <p className={styles.copyright}>&copy; {new Date().getFullYear()} TheraScript. All rights reserved.</p>
-        </div>
-      </footer>
+  <div className={styles.footerContent}>
+    <p className={styles.logo}>TheraScript</p>
+    <div className={styles.footerLinks}>
+      <Link href="/features" className={styles.footerLink}>Features</Link>
+      <Link href="/pricing" className={styles.footerLink}>Pricing</Link>
+      <Link href="/legal/terms" className={styles.footerLink}>Terms of Service</Link>
+      <Link href="/legal/privacy" className={styles.footerLink}>Privacy Policy</Link>
+    </div>
+    <p className={styles.copyright}>
+      &copy; {new Date().getFullYear()} TheraScript. All rights reserved.
+    </p>
+  </div>
+</footer>
+
     </div>
   );
 }
