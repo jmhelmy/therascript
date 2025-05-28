@@ -34,3 +34,25 @@ body {
   If you need other specific fonts like Geist Mono, configure them in 
   tailwind.config.js under theme.extend.fontFamily.
 */
+
+/* styles/globals.css */
+button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  background-color: #0284c7;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #0369a1;
+}
+
+button:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+}

@@ -1,0 +1,165 @@
+/* src/app/notes/[noteId]/NotePage.module.css */
+
+.pageContainer {
+  min-height: 100vh;
+  background-color: #f1f5f9;    /* slate-100 */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+               "Open Sans", "Helvetica Neue", sans-serif;
+  color: #334155;               /* slate-700 */
+  padding: 2rem 1rem;           /* py-8 px-4 */
+}
+
+.backLinkContainer {
+  margin-bottom: 1.5rem;
+}
+.backLink {
+  color: #009DA3;               /* primary */
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color .15s ease-in-out;
+}
+.backLink:hover {
+  color: #007c80;
+  text-decoration: underline;
+}
+
+.mainContent {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.articleCard {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;    /* slate-200 */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.articleHeader {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 1rem;
+  line-height: 1.3;
+}
+
+/* Two-column metadata */
+.metadataGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  color: #4A5568;               /* slate-600 */
+}
+.metadataGrid p {
+  margin: 0;
+  line-height: 1.6;
+}
+.metadataGrid strong {
+  font-weight: 600;
+  color: #2d3748;              /* slate-700 */
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background-color: #e0f2f7;
+  color: #007c80;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+}
+
+/* Section wrapper to space Transcript vs Notes */
+.contentSection {
+  margin-bottom: 2.5rem;
+}
+.contentSection:last-of-type {
+  margin-bottom: 0;
+}
+
+/* Section Titles */
+.sectionTitle {
+  display: inline-block;
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: #009DA3;
+  border-bottom: 2px solid #009DA3;
+}
+
+/* Transcript Block */
+.transcriptBlock {
+  position: relative;
+  background-color: #f7fafc;   /* slate-50 */
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* “Copy” button in top-right of transcript */
+.copyBtn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #009DA3;
+  cursor: pointer;
+}
+
+/* SOAP-style clinical notes */
+.soapNote {
+  background-color: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  padding: 1.25rem;
+}
+.soapSection {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+.soapSection:last-child {
+  margin-bottom: 0;
+}
+.soapIcon {
+  flex-shrink: 0;
+  width: 1.5rem;
+  margin-right: 0.75rem;
+  /* you can insert an inline SVG or font-icon here */
+}
+.soapContent {
+  flex: 1;
+}
+.soapTitle {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+.soapText {
+  margin: 0;
+  line-height: 1.6;
+}

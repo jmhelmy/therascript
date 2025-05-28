@@ -1,0 +1,164 @@
+.pageContainer {
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, #f9fbfc, #ecf9fb);
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #334155;
+    padding-bottom: 2rem;
+  }
+  
+  .wrapper {
+    padding: 2rem 0;
+  }
+  
+  .header {
+    max-width: 64rem;
+    margin: 0 auto 2rem;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  @media (min-width: 640px) {
+    .header {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+  
+  .welcomeText {
+    font-size: 1.125rem;
+    color: #475569;
+    font-weight: 500;
+  }
+  
+  .welcomeText strong {
+    font-weight: 700;
+    color: #009DA3;
+  }
+  
+  .newSessionBtn {
+    padding: 0.625rem 1.5rem;
+    background-color: #009DA3;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+  }
+  
+  .newSessionBtn:hover {
+    background-color: #007c80;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  }
+  
+  .mainContent {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  
+  /* Loading & Error States */
+  
+  .spinnerWrapper {
+    text-align: center;
+    padding: 4rem 2rem;
+    background-color: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .spinner {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 4px solid #009DA3;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .loadingText {
+    margin-top: 1.5rem;
+    font-size: 1.125rem;
+    color: #64748b;
+  }
+  
+  .alert {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Empty State Card */
+  
+  .emptyState {
+    text-align: center;
+    padding: 4rem 2rem;
+    background-color: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .emptyState h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+  
+  .emptyStateText {
+    margin-bottom: 1.5rem;
+    color: #475569;
+    line-height: 1.625;
+  }
+  
+  /* HIPAA badge */
+  
+  .hipaaBadge {
+    width: 120px;
+    height: auto;
+    margin-bottom: 1.5rem;
+    opacity: 0.8;
+  }
+  
+  /* Button Group */
+  
+  .buttonGroup {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Notes Grid */
+  
+  .notesList {
+    display: grid;
+    gap: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .notesList {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+  }
+  

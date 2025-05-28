@@ -1,19 +1,50 @@
-'use client';
-
 import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation'; // Import to detect the active page
+import styles from './TopNav.module.css';
+import CaduceusIcon from './CaduceusIcon';
 
-export const TopNav = () => {
+export function TopNav() {
+  const pathname = usePathname(); // Get the current URL path
+
   return (
-    <header className="bg-white shadow-sm px-4 py-3 mb-6 border-b">
-      <div className="max-w-5xl mx-auto flex justify-between items-center">
-        <Link href="/" className="text-xl font-semibold text-[#009DA3]">TheraNote</Link>
-        <Link
-          href="/logout"
-          className="text-sm text-gray-600 hover:text-[#009DA3] transition"
-        >
-          Log out
+    <nav className={styles.nav}>
+      {/* Left: Site Brand and Logo */}
+      <div className={styles.brandContainer}>
+        <Link href="/dashboard" className={styles.brand}>
+          <Image
+            src="/couchicon2.png" // IMPORTANT: Replace with your actual logo path
+            alt="TheraScript Logo"
+            width={32}
+            height={32}
+          />
+          TheraScript
         </Link>
       </div>
-    </header>
+
+      {/* Center: Main Navigation Links */}
+      <div className={styles.menu}>
+        <Link 
+          href="/dashboard" 
+          className={styles.link}
+          // Add this attribute to style the active link
+          aria-current={pathname === '/dashboard' ? 'page' : undefined}
+        >
+          Dashboard
+        </Link>
+        <Link 
+          href="/account" 
+          className={styles.link}
+          aria-current={pathname === '/account' ? 'page' : undefined}
+        >
+          My Account
+        </Link>
+      </div>
+
+      {/* Right: Compliance Icon */}
+      <div className={styles.complianceContainer}>
+        <CaduceusIcon className={styles.hipaaIcon} />
+      </div>
+    </nav>
   );
-};
+}

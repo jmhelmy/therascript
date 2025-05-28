@@ -1,0 +1,116 @@
+/* LoginPage.module.css */
+
+.wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+    background-color: #f5f7fa;
+  }
+  
+  .card {
+    width: 100%;
+    max-width: 400px;
+    background: #ffffff;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #333333;
+  }
+  
+  .formGroup {
+    margin-bottom: 1rem;
+  }
+  
+  .label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: #555555;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #cccccc;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  }
+  
+  .error {
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+  }
+  
+  .buttonPrimary {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #ffffff;
+    background-color: #009DA3;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .buttonPrimary:hover {
+    background-color: #2563eb;
+  }
+  
+  .buttonVerify {
+    background-color: #10b981;
+  }
+  
+  .buttonVerify:hover {
+    background-color: #059669;
+  }
+  
+  .recaptchaContainer {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  
+  @media (max-width: 480px) {
+    .card {
+      padding: 1.5rem;
+    }
+  }
+  
+
+.orText {
+    text-align: center;
+    margin: 1rem 0 0.5rem;
+    color: #666;
+    font-size: 0.875rem;
+  }
+  
+  .homeLink {
+    display: block;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #009DA3;
+    text-decoration: none;
+    margin-bottom: -0.5rem; /* pull it a bit closer to the form */
+  }
+  
+  .homeLink:hover {
+    text-decoration: underline;
+  }
