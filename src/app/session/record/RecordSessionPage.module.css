@@ -1,0 +1,141 @@
+.pageWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    background: linear-gradient(to bottom right, #f1f5f9, #e0f2fe);
+    font-family: sans-serif;
+  }
+  
+  .card {
+    width: 100%;
+    max-width: 720px;
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  }
+  
+  .headerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0369a1;
+    text-align: center;
+    flex: 1;
+  }
+  
+  .backLink {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #0369a1;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .backLink:hover {
+    color: #0c4a6e;
+    text-decoration: underline;
+  }
+  
+  .statusMessage {
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+  }
+  
+  .statusSuccess {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+  
+  .statusError {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+  
+  .buttonGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .button {
+    width: 100%;
+    max-width: 240px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  
+  .buttonStart {
+    background-color: #22c55e;
+    color: white;
+  }
+  
+  .buttonStart:hover {
+    background-color: #16a34a;
+  }
+  
+  .buttonStop {
+    background-color: #ef4444;
+    color: white;
+  }
+  
+  .buttonStop:hover {
+    background-color: #b91c1c;
+  }
+  
+  .audioPreview {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    background-color: #f9fafb;
+    text-align: center;
+  }
+  
+  .audio {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  .processButton {
+    background-color: #0369a1;
+    color: white;
+  }
+  
+  .processButton:hover {
+    background-color: #0c4a6e;
+  }
+  
+  .progressBar {
+    width: 100%;
+    margin-top: 1rem;
+    height: 0.5rem;
+    background-color: #e2e8f0;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  
+  .progress {
+    height: 100%;
+    background-color: #0369a1;
+    transition: width 0.3s ease;
+  }
+  

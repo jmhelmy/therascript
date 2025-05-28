@@ -2,40 +2,35 @@
 
 .pageContainer {
   min-height: 100vh;
-  background-color: #f8fafc; /* slate-50 equivalent for a slightly off-white */
-  font-family: sans-serif;
-  color: #1e293b; /* slate-800 */
-  padding-top: 2rem;
-  padding-bottom: 2rem;
+  background-color: #f1f5f9; /* slate-100, a bit softer than slate-50 for overall page */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  color: #334155; /* slate-700, for good contrast on light backgrounds */
+  padding: 2rem 1rem; /* py-8 px-4 */
 }
 
 .mainContent {
-  max-width: 800px;
+  max-width: 800px; /* Consistent with previous NotePage styling */
   margin-left: auto;
   margin-right: auto;
-  padding: 1rem;
-}
-
-@media (min-width: 640px) { /* sm breakpoint */
-  .mainContent {
-    padding: 1.5rem;
-  }
-}
-
-@media (min-width: 768px) { /* md breakpoint */
-  .mainContent {
-    padding: 2rem;
-  }
+  /* Removed individual padding here, will be handled by pageContainer or articleCard */
 }
 
 .backLinkContainer {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem; /* Consistent */
+  margin-left: 0.5rem; /* Added a bit of left margin if using PageWrapper's padding */
 }
+@media (min-width: 640px) {
+  .backLinkContainer {
+    margin-left: 0; /* No extra indent on larger screens if main content padding is sufficient */
+  }
+}
+
 
 .backLink {
   color: #009DA3; /* Your primary color */
   text-decoration: none;
   font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium for better visibility */
   transition: color 0.15s ease-in-out;
 }
 
@@ -45,85 +40,96 @@
 }
 
 .articleCard {
-  background-color: white;
-  padding: 1.5rem;
+  background-color: #ffffff; /* White */
+  padding: 1.5rem; /* p-6 */
   border-radius: 0.75rem; /* rounded-xl */
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); /* shadow-xl */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer, more modern shadow */
   border: 1px solid #e2e8f0; /* slate-200 */
 }
 
 @media (min-width: 640px) { /* sm breakpoint */
   .articleCard {
-    padding: 2rem;
+    padding: 2rem; /* sm:p-8 */
   }
+}
+@media (min-width: 1024px) { /* lg breakpoint for even more padding if desired */
+    .articleCard {
+        padding: 2.5rem;
+    }
 }
 
 .articleHeader {
   padding-bottom: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem; /* Increased space after header */
   border-bottom: 1px solid #e2e8f0; /* slate-200 */
 }
 
 .title {
-  font-size: 1.875rem; /* text-3xl equivalent */
-  font-weight: 700;   /* font-bold */
-  color: #1e293b;    /* slate-900 */
-  margin-bottom: 0.75rem;
-}
-
-@media (min-width: 640px) { /* sm breakpoint */
-  .title {
-    font-size: 1.875rem; 
-  }
+  font-size: 2rem; /* Increased slightly from 1.875rem */
+  font-weight: 700;
+  color: #1a202c; /* slate-800/gray-900, for strong title */
+  margin-bottom: 1rem; /* Increased space after title */
+  line-height: 1.3;
 }
 
 .detailsMeta { 
-  font-size: 0.75rem; /* text-xs */
-  color: #64748b; /* slate-500 */
+  font-size: 0.875rem; /* text-sm, slightly larger than text-xs for readability */
+  color: #4A5568; /* slate-600/gray-600 */
 }
 
 .detailsMeta p {
-  margin-bottom: 0.375rem; 
+  margin-bottom: 0.5rem; /* space-y-2 equivalent */
+  line-height: 1.6;
 }
 
 .detailsMeta strong {
-  color: #475569; /* slate-600 */
+  color: #2d3748; /* slate-700/gray-700 */
   font-weight: 600; 
 }
 
 .statusBadge {
-  margin-left: 0.25rem; 
-  padding: 0.125rem 0.5rem; 
-  background-color: #cffafe; 
-  color: #0891b2;       
-  font-size: 0.75rem; 
+  margin-left: 0.5rem; /* Increased slightly */
+  padding: 0.25rem 0.75rem; /* py-1 px-3 */
+  background-color: #e0f2f7; /* Lighter primary color */
+  color: #007c80;       /* Darker primary color */
+  font-size: 0.75rem; /* text-xs */
   font-weight: 600; 
   border-radius: 9999px; 
+  display: inline-block; /* Ensure padding applies correctly */
 }
 
 .contentSection {
-  margin-bottom: 2rem; 
+  margin-bottom: 2.5rem; /* Increased spacing between Transcript and SOAP note sections */
+}
+
+.contentSection:last-of-type { /* Remove bottom margin from the very last section */
+  margin-bottom: 0;
 }
 
 .sectionTitle {
-  font-size: 1.25rem; 
+  font-size: 1.375rem; /* Between text-xl and text-2xl */
   font-weight: 600;   
-  color: #1e293b;    
-  margin-bottom: 0.75rem; 
+  color: #009DA3;    /* Primary color for section titles */
+  margin-bottom: 1rem; 
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #f1f5f9; 
+  border-bottom: 2px solid #009DA3; /* Thicker, primary color border */
+  display: inline-block; /* Border only under text */
 }
 
 .textBlock {
-  padding: 1rem;
-  font-size: 0.875rem; 
-  line-height: 1.625;  
-  background-color: #f8fafc; 
-  border-radius: 0.5rem; 
-  box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.05); 
-  white-space: pre-wrap;
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid #e2e8f0; 
-  color: #334155; 
+  padding: 1.25rem; /* Increased padding */
+  font-size: 0.95rem; /* text-base or slightly less, for readability */
+  line-height: 1.75;  /* Increased line height */
+  background-color: #f7fafc; /* Even lighter slate/gray, almost white */
+  border-radius: 0.375rem; /* rounded-md */
+  /* Removed inset shadow for a flatter, cleaner look */
+  white-space: pre-wrap; /* This is key for showing full content */
+  /* REMOVED: max-height: 300px; */
+  /* REMOVED: overflow-y: auto; */
+  border: 1px solid #e8edf3; /* Lighter border */
+  color: #334155; /* slate-700 */
+}
+
+.textBlock p:last-child { /* If AI generates paragraphs in pre, remove mb from last one */
+    margin-bottom: 0;
 }

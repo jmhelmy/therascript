@@ -1,4 +1,5 @@
 // src/app/notes/[noteId]/page.tsx
+
 import { dbAdmin } from '@/lib/adminFirebase';
 import { Timestamp as FirestoreAdminTimestamp } from 'firebase-admin/firestore';
 import { notFound } from 'next/navigation';
@@ -108,7 +109,7 @@ export default async function NotePage({ params }: NotePageProps) {
 
           <section>
             <h2 className={styles.sectionTitle}>
-              SOAP Note / Structured Content
+              Notes
             </h2>
             <div className={styles.textBlock}>
               {noteData.structuredContent ||
