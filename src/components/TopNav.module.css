@@ -1,0 +1,32 @@
+.nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background-color: #fff;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .brand {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    text-decoration: none;
+  }
+  
+  .menu {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .link {
+    font-size: 1rem;
+    color: #475569;
+    text-decoration: none;
+    transition: color 0.15s ease-in-out;
+  }
+  
+  .link:hover {
+    color: #1e293b;
+  }
+  

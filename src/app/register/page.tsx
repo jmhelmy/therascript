@@ -1,18 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { auth } from '@/lib/firebaseConfig';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebaseConfig';
+import styles from './RegisterPage.module.css';
 
-export default function SignupPage() {
+export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       router.push('/dashboard');
@@ -22,20 +24,47 @@ export default function SignupPage() {
   };
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Sign Up</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email: </label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </div>
-        <div>
-          <label>Password: </label>
-          <input value={password} onChange={(e) => setPassword(e.target.value)} required type="password" />
-        </div>
-        <button type="submit">Create Account</button>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-      </form>
+    <div className={styles.pageContainer}>
+      <main className={styles.card}>
+        <h1 className={styles.title}>Create Account</h1>
+
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <label className={styles.label}>
+            Email
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              className={styles.input}
+            />
+          </label>
+
+          <label className={styles.label}>
+            Password
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              className={styles.input}
+            />
+          </label>
+
+          {error && <p className={styles.error}>{error}</p>}
+
+          <button type="submit" className={styles.submitBtn}>
+            Sign Up
+          </button>
+        </form>
+
+        <p className={styles.footer}>
+          Already have an account?{' '}
+          <a href="/login" className={styles.link}>
+            Log in
+          </a>
+        </p>
+      </main>
     </div>
   );
 }
