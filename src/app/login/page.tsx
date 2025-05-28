@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   signInWithEmailAndPassword,
-  sendSignInLinkToEmail,
   RecaptchaVerifier,
   MultiFactorResolver,
   PhoneAuthProvider,
@@ -12,59 +12,49 @@ import {
   signInWithCredential,
 } from "firebase/auth";
 import { auth } from "@/lib/auth";
+import styles from "./LoginPage.module.css";
 
 let recaptchaVerifier: RecaptchaVerifier;
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [showMfaPrompt, setShowMfaPrompt] = useState(false);
-  const [verificationId, setVerificationId] = useState("");
-  const [smsCode, setSmsCode] = useState("");
-  const [resolver, setResolver] = useState<MultiFactorResolver | null>(null);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const [email, setEmail]                   = useState("");
+  const [password, setPassword]             = useState("");
+  const [error, setError]                   = useState("");
+  const [showMfaPrompt, setShowMfaPrompt]   = useState(false);
+  const [verificationId, setVerificationId] = useState("");
+  const [smsCode, setSmsCode]               = useState("");
+  const [resolver, setResolver]             = useState<MultiFactorResolver | null>(null);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard"); // Redirect to dashboard on successful login
+      router.push("/dashboard");
     } catch (err: any) {
-      console.error("Login error:", err);
       if (err.code === "auth/multi-factor-auth-required") {
-        const multiFactorResolver = err.resolver as MultiFactorResolver;
-        setResolver(multiFactorResolver);
+        const mfr = err.resolver as MultiFactorResolver;
+        setResolver(mfr);
         setShowMfaPrompt(true);
-
-        // Assuming the first factor is phone for simplicity
-        const phoneInfo = multiFactorResolver.hints[0];
+        const phoneInfo = mfr.hints[0];
         if (phoneInfo.factorId === PhoneMultiFactorGenerator.FACTOR_ID) {
-          const phoneAuthProvider = new PhoneAuthProvider(auth);
+          const provider = new PhoneAuthProvider(auth);
           if (!recaptchaVerifier) {
-            recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-              'size': 'invisible',
-              'callback': (response: any) => {
-                // reCAPTCHA solved, a response is returned
-              },
-              'expired-callback': () => {
-                // Response expired. Ask user to solve reCAPTCHA again.
-                setError("reCAPTCHA expired. Please try again.");
-              }
-            });
+            recaptchaVerifier = new RecaptchaVerifier(
+              auth,
+              "recaptcha-container",
+              { size: "invisible", callback: () => {}, "expired-callback": () => setError("reCAPTCHA expired. Try again.") }
+            );
           }
-          const verificationId = await phoneAuthProvider.verifyPhoneNumber(
-            {
-              phoneNumber: phoneInfo.phoneNumber,
-              session: multiFactorResolver.session,
-            },
+          const id = await provider.verifyPhoneNumber(
+            { phoneNumber: phoneInfo.phoneNumber, session: mfr.session },
             recaptchaVerifier
           );
-          setVerificationId(verificationId);
+          setVerificationId(id);
         } else {
-          setError("Unsupported MFA factor type.");
+          setError("Unsupported MFA factor.");
         }
       } else {
         setError(err.message);
@@ -72,87 +62,90 @@ export default function LoginPage() {
     }
   };
 
-  const handleMfaSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleMfaSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
+    if (!resolver || !verificationId) {
+      setError("Missing MFA details.");
+      return;
+    }
     try {
-      if (resolver && verificationId && smsCode) {
-        const phoneAuthCredential = PhoneAuthProvider.credential(
-          verificationId,
-          smsCode
-        );
-        const multiFactorCredential = PhoneMultiFactorGenerator.credentialFromCredential(
-          phoneAuthCredential
-        );
-        await signInWithCredential(resolver, multiFactorCredential);
-        router.push("/dashboard"); // Redirect to dashboard on successful MFA completion
-      } else {
-        setError("Missing MFA details.");
-      }
+      const phoneCred = PhoneAuthProvider.credential(verificationId, smsCode);
+      const multiCred = PhoneMultiFactorGenerator.credentialFromCredential(phoneCred)!;
+      await signInWithCredential(resolver, multiCred);
+      router.push("/dashboard");
     } catch (err: any) {
-      console.error("MFA sign-in error:", err);
       setError(err.message);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="max-w-md w-full bg-white p-8 rounded shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-        {!showMfaPrompt ? (
+    <div className={styles.wrapper}>
+      <div className={styles.card}>
+        <h2 className={styles.title}>Login</h2>
+
+        { !showMfaPrompt ? (
           <form onSubmit={handleLogin}>
-            <div className="mb-4">
-              <label className="block text-gray-700">Email</label>
+            <div className={styles.formGroup}>
+              <label htmlFor="email" className={styles.label}>Email</label>
               <input
+                id="email"
                 type="email"
-                className="w-full px-3 py-2 border rounded"
+                className={styles.input}
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 required
               />
             </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Password</label>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="password" className={styles.label}>Password</label>
               <input
+                id="password"
                 type="password"
-                className="w-full px-3 py-2 border rounded"
+                className={styles.input}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 required
               />
             </div>
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
-            >
+
+            {error && <p className={styles.error}>{error}</p>}
+
+            <button type="submit" className={styles.buttonPrimary}>
               Login
             </button>
           </form>
         ) : (
           <form onSubmit={handleMfaSignIn}>
-            <p className="mb-4">Please enter the verification code sent to your phone.</p>
-            <div className="mb-4">
-              <label className="block text-gray-700">SMS Code</label>
+            <p>Please enter the verification code sent to your phone.</p>
+            <div className={styles.formGroup}>
+              <label htmlFor="smsCode" className={styles.label}>SMS Code</label>
               <input
+                id="smsCode"
                 type="text"
-                className="w-full px-3 py-2 border rounded"
+                className={styles.input}
                 value={smsCode}
-                onChange={(e) => setSmsCode(e.target.value)}
+                onChange={e => setSmsCode(e.target.value)}
                 required
               />
             </div>
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+            {error && <p className={styles.error}>{error}</p>}
             <button
               type="submit"
-              className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
+              className={`${styles.buttonPrimary} ${styles.buttonVerify}`}
             >
               Verify Code
             </button>
           </form>
         )}
-        <div id="recaptcha-container"></div> {/* reCAPTCHA container */}
+
+        <div id="recaptcha-container" className={styles.recaptchaContainer} />
+
+        <p className={styles.orText}>or</p>
+        <Link href="/" className={styles.homeLink}>
+          ← Back to Homepage
+        </Link>
       </div>
     </div>
   );

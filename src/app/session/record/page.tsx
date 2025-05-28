@@ -19,6 +19,15 @@ import Button from '@/components/Button';              // ← now actually used!
 // Styles
 import styles from './RecordSessionPage.module.css';
 
+
+// helper to format raw seconds into M:SS
+function formatDuration(seconds: number) {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+
 export default function RecordSessionPage() {
   const router = useRouter();
 
@@ -55,7 +64,9 @@ export default function RecordSessionPage() {
   } = useAudioProcessor();
 
   // Show whichever status message is set last
-  const displayStatus = processorStatus || recorderStatus;
+  const displayStatus = isRecording
+  ? `Recording… (${formatDuration(recordingDuration)})`
+  : processorStatus || recorderStatus;
 
   // — TIMING & AUTO-PROCESS GUARD —
   const [hasStarted, setHasStarted] = useState(false);
