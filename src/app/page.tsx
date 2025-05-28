@@ -28,10 +28,16 @@ export default function HomePage() {
     <div className={styles.pageContainer}>
       {/* --- HEADER --- */}
       <header className={styles.header}>
-        <Link href="/" className={styles.logo}>
-          TheraScript
-        </Link>
-        <nav className={styles.navLinks}>
+  <Link href="/" className={styles.logo}>
+    <Image
+      src="/couchicon2.png"
+      alt="TheraScript Logo"
+      width={36}  // A slightly larger size for the homepage logo
+      height={36}
+    />
+    <span>TheraScript</span>
+  </Link>
+  <nav className={styles.navLinks}>
           <Link href="/login" className={styles.navButtonSecondary}>
             Log In
           </Link>
@@ -45,7 +51,7 @@ export default function HomePage() {
       <section className={styles.heroSection}>
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
-            Your AI Partner in Clinical Excellence
+        Clinical Notes & Clinical Feedback using HIPAA Compliant AI
           </h1>
           <p className={styles.heroSubtitle}>
             TheraScript goes beyond automated notes. We provide secure, AI-powered tools to streamline your documentation and offer clinical insights, giving you more time and confidence to focus on what matters most—your clients.

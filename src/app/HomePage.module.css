@@ -22,9 +22,12 @@
   }
   
   .logo {
+    display: flex; /* This is the key change */
+    align-items: center; /* This vertically centers the text and image */
+    gap: 0.75rem; /* This adds a nice space between the image and text */
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--color-primary);
+    color: #213650;
     text-decoration: none;
   }
   

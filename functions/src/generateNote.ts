@@ -1,15 +1,17 @@
 // functions/src/generateNote.ts
+
 import * as functions from "firebase-functions/v1";
+import * as admin from "firebase-admin";
 import express from "express";
 import corsMiddleware from "cors";
 
-// Import your utility and service functions
-import { authenticate } from "./utils/authenticate"; // This will use adminApp.auth()
-import { downloadAudio, deleteAudio } from "./services/storage"; // These use defaultBucket from adminSdk
+// Utility/service imports
+import { authenticate } from "./utils/authenticate";
+import { downloadAudio, deleteAudio } from "./services/storage";
 import { transcodeWebMtoPCM } from "./services/transcoder";
 import { transcribePCMWithAzure } from "./services/azureSpeechService";
 import { generateSOAPNote } from "./services/azureOpenAIService";
-import { saveNote } from "./services/firestoreService"; // This will use adminApp.firestore.Timestamp
+import { saveNote } from "./services/firestoreService";
 import { GenerateNoteData, GenerateNoteResult } from "./types";
 
 const app = express();
@@ -20,65 +22,64 @@ app.post(
   "/",
   authenticate,
   async (req: express.Request, res: express.Response): Promise<void> => {
-    // ... (Your existing, refactored orchestrator logic from response #145) ...
-    // This logic calls the service functions which now use adminApp internally
-    let therapistIdFromAuth: string | undefined;
-    let audioFileNameFromRequest: string | undefined;
+    let therapistId: string | undefined;
+    let audioFileName: string | undefined;
 
     try {
-      // @ts-ignore user is attached by the authenticate middleware
-      const firebaseUser: admin.auth.DecodedIdToken = req.user; // admin type here is from global firebase-admin
-      therapistIdFromAuth = firebaseUser.uid;
+      // @ts-ignore — set by authenticate middleware
+      const userToken = req.user as admin.auth.DecodedIdToken;
+      therapistId = userToken.uid;
 
-      const { audioFileName, sessionDate } = req.body as GenerateNoteData;
-      audioFileNameFromRequest = audioFileName;
+      const body = req.body as GenerateNoteData;
+      audioFileName = body.audioFileName;
+      const sessionDate = body.sessionDate;
 
-      if (!therapistIdFromAuth) {
-        functions.logger.error("Authentication failed, therapistId not found.");
-        res.status(403).json({ success: false, error: "Authentication failed." } as GenerateNoteResult);
+      if (!therapistId) {
+        functions.logger.error("Auth failed: no UID");
+        res.status(403).json({ success: false, error: "Not authenticated." } as GenerateNoteResult);
         return;
       }
-      // ... (rest of the input validation) ...
 
-      functions.logger.info(`Http Trigger: Starting generateNote for therapist: ${therapistIdFromAuth}, audioFile: ${audioFileNameFromRequest}`);
+      functions.logger.info(`Starting generateNote for ${therapistId}, file ${audioFileName}`);
 
-      const rawAudioBuffer = await downloadAudio(audioFileNameFromRequest);
-      functions.logger.info("Audio downloaded successfully.");
+      // 1. Download raw audio
+      const rawAudio = await downloadAudio(audioFileName);
+      functions.logger.info("Audio downloaded.");
 
-      const pcmBuffer = await transcodeWebMtoPCM(rawAudioBuffer);
-      functions.logger.info("Audio transcoded to PCM successfully.");
+      // 2. Transcode to PCM
+      const pcmBuffer = await transcodeWebMtoPCM(rawAudio);
+      functions.logger.info("Transcoded to PCM.");
 
-      await deleteAudio(audioFileNameFromRequest); 
-      functions.logger.info("Original audio file deleted after transcoding.");
+      // 3. Delete raw audio immediately
+      await deleteAudio(audioFileName);
+      functions.logger.info(`Deleted original audio: ${audioFileName}`);
 
+      // 4. Transcribe via Azure
       const transcript = await transcribePCMWithAzure(pcmBuffer);
-      if (!transcript) throw new Error("Transcription returned empty result.");
-      functions.logger.info("Transcription successful.");
+      if (!transcript) throw new Error("Empty transcript");
+      functions.logger.info("Transcription complete.");
 
+      // 5. Generate SOAP note via OpenAI
       const structuredContent = await generateSOAPNote(transcript);
-      if (!structuredContent) throw new Error("Note generation returned empty result.");
-      functions.logger.info("SOAP note generated successfully.");
+      if (!structuredContent) throw new Error("Empty SOAP note");
+      functions.logger.info("SOAP note generated.");
 
+      // 6. Persist note in Firestore
       const noteId = await saveNote({
-        therapistId: therapistIdFromAuth,
+        therapistId,
         sessionDate,
         transcript,
-        structuredContent: structuredContent,
-        originalAudioFileName: audioFileNameFromRequest,
+        structuredContent,
+        originalAudioFileName: audioFileName,
       });
- 
-      functions.logger.info("Note ID received from saveNote service:", noteId);
-      res.status(200).json({ success: true, noteId, message: "Note generated and saved successfully." } as GenerateNoteResult);
-    
-    } catch (err: unknown) { 
-      const errorMessage = (err instanceof Error && err.message) ? err.message : "An internal error occurred during note processing.";
-      functions.logger.error("Error in generateNote main try/catch:", { 
-        errorMessage, 
-        originalError: err,
-        therapistId: therapistIdFromAuth || "N/A", 
-        audioFile: audioFileNameFromRequest || "N/A"
-      });
-      res.status(500).json({ success: false, error: errorMessage } as GenerateNoteResult);
+
+      functions.logger.info("Note saved with ID:", noteId);
+      res.status(200).json({ success: true, noteId, message: "Note generated and saved." } as GenerateNoteResult);
+
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Internal error";
+      functions.logger.error("generateNote error:", { msg, therapistId, audioFileName, err });
+      res.status(500).json({ success: false, error: msg } as GenerateNoteResult);
     }
   }
 );
