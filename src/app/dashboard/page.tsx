@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import CaduceusIcon from '@/components/CaduceusIcon';
+import Button from '@/components/Button';
 import Link from 'next/link';
 import { User as FirebaseUser } from 'firebase/auth';
 import { auth, firestore as db } from '@/lib/firebaseConfig';
@@ -30,6 +31,7 @@ export default function DashboardPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
 
+  // Auth listener
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((u) => {
       if (u) setUser(u);
@@ -39,54 +41,56 @@ export default function DashboardPage() {
     return () => unsub();
   }, [router]);
 
+  // Firestore listener
   useEffect(() => {
-    if (user) {
-      setNotesLoading(true);
-      setErrorMessage(null);
-      const notesRef = collection(db, 'therapySessionNotes');
-      const q = query(
-        notesRef,
-        where('therapistId', '==', user.uid),
-        orderBy('sessionDate', 'desc')
-      );
-      const unsub = onSnapshot(
-        q,
-        (snap) => {
-          const arr: DisplayNote[] = [];
-          snap.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
-            const d = doc.data();
-            let date: Date;
-            if (d.sessionDate instanceof FirestoreTimestamp) {
-              date = d.sessionDate.toDate();
-            } else {
-              date = new Date(); // fallback
-            }
-            arr.push({
-              id: doc.id,
-              date,
-              clientInitials: d.clientInitials || 'N/A',
-              summary: d.structuredContent || d.summary || 'No summary.',
-            });
+    if (!user) return;
+    setNotesLoading(true);
+    setErrorMessage(null);
+
+    const notesRef = collection(db, 'therapySessionNotes');
+    const q = query(
+      notesRef,
+      where('therapistId', '==', user.uid),
+      orderBy('sessionDate', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        const arr: DisplayNote[] = [];
+        snap.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+          const d = doc.data();
+          const date =
+            d.sessionDate instanceof FirestoreTimestamp
+              ? d.sessionDate.toDate()
+              : new Date();
+          arr.push({
+            id: doc.id,
+            date,
+            clientInitials: d.clientInitials || 'N/A',
+            summary: d.structuredContent || d.summary || 'No summary.',
           });
-          setNotes(arr);
-          setNotesLoading(false);
-        },
-        (err) => {
-          setErrorMessage(err.message);
-          setNotesLoading(false);
-        }
-      );
-      return () => unsub();
-    }
+        });
+        setNotes(arr);
+        setNotesLoading(false);
+      },
+      (err) => {
+        setErrorMessage(err.message);
+        setNotesLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
   }, [user]);
 
+  // Loading state
   if (authLoading) {
     return (
       <div className={styles.pageContainer}>
         <TopNav />
         <div className={styles.spinnerWrapper}>
           <div className={styles.spinner} />
-          <p>Loading user session…</p>
+          <p className={styles.loadingText}>Loading user session…</p>
         </div>
       </div>
     );
@@ -97,18 +101,14 @@ export default function DashboardPage() {
       <TopNav />
       <div className={styles.wrapper}>
         <header className={styles.header}>
-          <div className={styles.headerInner}>
-            {user && (
-              <p className={styles.welcomeText}>
-                Welcome back, <strong>{user.email}</strong>!
-              </p>
-            )}
-            <Link href="/session/record">
-              <button className={styles.newSessionBtn}>
-                + New Session Note
-              </button>
-            </Link>
-          </div>
+          {user && (
+            <p className={styles.welcomeText}>
+              Welcome back, <strong>{user.email}</strong>!
+            </p>
+          )}
+          <Link href="/session/record" passHref>
+            <Button variant="primary">+ New Session Note</Button>
+          </Link>
         </header>
 
         <main className={styles.mainContent}>
@@ -121,25 +121,29 @@ export default function DashboardPage() {
           {notesLoading ? (
             <div className={styles.spinnerWrapper}>
               <div className={styles.spinner} />
-              <p>Loading your session notes…</p>
+              <p className={styles.loadingText}>
+                Loading your session notes…
+              </p>
             </div>
           ) : notes.length === 0 ? (
             <div className={styles.emptyState}>
-              <CaduceusIcon />
+              <CaduceusIcon className={styles.hipaaBadge} />
+
               <h2>No session notes yet</h2>
-              <p>
-                It looks like you haven't created any session notes yet.
-                Start one to generate your first clinical note automatically.
+              <p className={styles.emptyStateText}>
+                You’re all set—create your first clinical note now, and we’ll
+                handle the rest.
               </p>
-              <button
-                onClick={() => router.push('/session/record')}
-                className="startBtn"
-              >
-                Start a New Session
-              </button>
-              <button className="tryBtn">
-                Try 1 hour for free, after $1/hour
-              </button>
+
+              <div className={styles.buttonGroup}>
+                <Button
+                  variant="primary"
+                  onClick={() => router.push('/session/record')}
+                >
+                  Start a New Session
+                </Button>
+                <Button variant="secondary">Try 1 hour free, then $1/hr</Button>
+              </div>
             </div>
           ) : (
             <div className={styles.notesList}>

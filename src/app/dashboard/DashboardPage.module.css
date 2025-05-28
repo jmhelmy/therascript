@@ -7,8 +7,7 @@
   }
   
   .wrapper {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding: 2rem 0;
   }
   
   .header {
@@ -17,7 +16,6 @@
     padding: 0 1rem;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     gap: 1.5rem;
   }
   
@@ -58,29 +56,23 @@
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
   }
   
-  .newSessionBtn:focus-visible {
-    outline: 2px solid transparent;
-    outline-offset: 2px;
-    box-shadow: 0 0 0 3px rgba(0, 157, 163, 0.4);
-  }
-  
   .mainContent {
     max-width: 64rem;
     margin: 0 auto;
     padding: 0 1rem;
   }
   
-  .loadingOrEmptyWrapper {
+  /* Loading & Error States */
+  
+  .spinnerWrapper {
     text-align: center;
     padding: 4rem 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: white;
+    background-color: #fff;
     border-radius: 1rem;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
     border: 1px solid #e2e8f0;
+    max-width: 500px;
+    margin: 0 auto;
   }
   
   .spinner {
@@ -93,9 +85,7 @@
   }
   
   @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
   }
   
   .loadingText {
@@ -114,21 +104,20 @@
     font-size: 0.875rem;
   }
   
-  .alert strong {
-    font-weight: 600;
+  /* Empty State Card */
+  
+  .emptyState {
+    text-align: center;
+    padding: 4rem 2rem;
+    background-color: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    max-width: 500px;
+    margin: 0 auto;
   }
   
-  .emptyStateIcon {
-    margin-bottom: 1.5rem;
-  }
-  
-  .emptyStateIcon svg {
-    width: 3.5rem;
-    height: 3.5rem;
-    color: #009DA3;
-  }
-  
-  .emptyStateTitle {
+  .emptyState h2 {
     margin-bottom: 0.5rem;
     font-size: 1.5rem;
     font-weight: 600;
@@ -138,43 +127,29 @@
   .emptyStateText {
     margin-bottom: 1.5rem;
     color: #475569;
-    max-width: 28rem;
     line-height: 1.625;
   }
   
-  .emptyStateButtonBase {
-    display: inline-block;
-    min-width: 14rem;
-    padding: 0.75rem 1.5rem;
-    font-size: 0.95rem;
-    font-weight: 500;
-    border-radius: 0.5rem;
-    text-align: center;
-    transition: all 0.2s ease;
-    cursor: pointer;
+  /* HIPAA badge */
+  
+  .hipaaBadge {
+    width: 120px;
+    height: auto;
+    margin-bottom: 1.5rem;
+    opacity: 0.8;
   }
   
-  .emptyStatePrimaryBtn {
-    background-color: #009DA3;
-    color: white;
-    border: 1px solid transparent;
+  /* Button Group */
+  
+  .buttonGroup {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
   }
   
-  .emptyStatePrimaryBtn:hover {
-    background-color: #007c80;
-  }
-  
-  .emptyStateSecondaryBtn {
-    background-color: white;
-    color: #009DA3;
-    border: 1px solid #009DA3;
-  }
-  
-  .emptyStateSecondaryBtn:hover {
-    background-color: #f0f9ff;
-    color: #007c80;
-    border-color: #007c80;
-  }
+  /* Notes Grid */
   
   .notesList {
     display: grid;
