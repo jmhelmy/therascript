@@ -17,7 +17,7 @@ export default function RegisterPage() {
     setError(null);
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard');
+      router.push('/legal'); // 👈 Redirect here instead of /dashboard
     } catch (err: any) {
       setError(err.message);
     }
