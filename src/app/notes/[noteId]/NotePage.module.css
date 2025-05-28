@@ -1,0 +1,129 @@
+/* src/app/notes/[noteId]/NotePage.module.css */
+
+.pageContainer {
+  min-height: 100vh;
+  background-color: #f8fafc; /* slate-50 equivalent for a slightly off-white */
+  font-family: sans-serif;
+  color: #1e293b; /* slate-800 */
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.mainContent {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) { /* sm breakpoint */
+  .mainContent {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) { /* md breakpoint */
+  .mainContent {
+    padding: 2rem;
+  }
+}
+
+.backLinkContainer {
+  margin-bottom: 1.5rem;
+}
+
+.backLink {
+  color: #009DA3; /* Your primary color */
+  text-decoration: none;
+  font-size: 0.875rem; /* text-sm */
+  transition: color 0.15s ease-in-out;
+}
+
+.backLink:hover {
+  color: #007c80; /* Darker shade */
+  text-decoration: underline;
+}
+
+.articleCard {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); /* shadow-xl */
+  border: 1px solid #e2e8f0; /* slate-200 */
+}
+
+@media (min-width: 640px) { /* sm breakpoint */
+  .articleCard {
+    padding: 2rem;
+  }
+}
+
+.articleHeader {
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e2e8f0; /* slate-200 */
+}
+
+.title {
+  font-size: 1.875rem; /* text-3xl equivalent */
+  font-weight: 700;   /* font-bold */
+  color: #1e293b;    /* slate-900 */
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 640px) { /* sm breakpoint */
+  .title {
+    font-size: 1.875rem; 
+  }
+}
+
+.detailsMeta { 
+  font-size: 0.75rem; /* text-xs */
+  color: #64748b; /* slate-500 */
+}
+
+.detailsMeta p {
+  margin-bottom: 0.375rem; 
+}
+
+.detailsMeta strong {
+  color: #475569; /* slate-600 */
+  font-weight: 600; 
+}
+
+.statusBadge {
+  margin-left: 0.25rem; 
+  padding: 0.125rem 0.5rem; 
+  background-color: #cffafe; 
+  color: #0891b2;       
+  font-size: 0.75rem; 
+  font-weight: 600; 
+  border-radius: 9999px; 
+}
+
+.contentSection {
+  margin-bottom: 2rem; 
+}
+
+.sectionTitle {
+  font-size: 1.25rem; 
+  font-weight: 600;   
+  color: #1e293b;    
+  margin-bottom: 0.75rem; 
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f1f5f9; 
+}
+
+.textBlock {
+  padding: 1rem;
+  font-size: 0.875rem; 
+  line-height: 1.625;  
+  background-color: #f8fafc; 
+  border-radius: 0.5rem; 
+  box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.05); 
+  white-space: pre-wrap;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0; 
+  color: #334155; 
+}

@@ -1,9 +1,9 @@
 // src/app/notes/[noteId]/page.tsx
-
 import { dbAdmin } from '@/lib/adminFirebase';
 import { Timestamp as FirestoreAdminTimestamp } from 'firebase-admin/firestore';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import styles from './NotePage.module.css';
 
 interface NoteDocument {
   therapistId: string;
@@ -20,75 +20,42 @@ interface NotePageProps {
   params: { noteId: string };
 }
 
-export default async function NotePage({ params: { noteId } }: NotePageProps) {
-  console.log(`Server NotePage: Fetching note with ID: ${noteId}`);
+export default async function NotePage({ params }: NotePageProps) {
+  // ⚠️ you must await params before destructuring
+  const { noteId } = await params;
 
-  let noteData: NoteDocument;
-  try {
-    const snapshot = await dbAdmin
-      .collection('therapySessionNotes')
-      .doc(noteId)
-      .get();
+  if (!noteId) return notFound();
 
-    // ✅ exists is a boolean property on the Admin SDK snapshot
-    if (!snapshot.exists) {
-      console.warn(`Server NotePage: Note not found for ID: ${noteId}`);
-      return notFound();
-    }
+  const noteSnap = await dbAdmin
+    .collection('therapySessionNotes')
+    .doc(noteId)
+    .get();
 
-    noteData = snapshot.data() as NoteDocument;
-  } catch (err) {
-    console.error(`Server NotePage: Error fetching document ${noteId}:`, err);
-    throw new Error(`Failed to fetch note: ${noteId}. Please check server logs.`);
-  }
+  if (!noteSnap.exists) return notFound();
 
-  // Safety checks for your timestamps
-  if (
-    !noteData.sessionDate ||
-    typeof noteData.sessionDate.toDate !== 'function'
-  ) {
-    console.error('Server NotePage: Invalid sessionDate', noteData.sessionDate);
-    throw new Error('Invalid session date in fetched note data.');
-  }
-  if (
-    !noteData.createdAt ||
-    typeof noteData.createdAt.toDate !== 'function'
-  ) {
-    console.error('Server NotePage: Invalid createdAt', noteData.createdAt);
-    throw new Error('Invalid creation date in fetched note data.');
-  }
+  const noteData = noteSnap.data() as NoteDocument;
 
   const sessionDate = noteData.sessionDate.toDate();
   const createdAtDate = noteData.createdAt.toDate();
 
   return (
-    <div className="min-h-screen bg-slate-100 font-sans text-slate-800 py-8">
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8">
-        <div className="mb-6">
-          <Link
-            href="/dashboard"
-            className="text-sky-600 hover:text-sky-700 hover:underline text-sm transition-colors duration-150"
-          >
-            &larr; Back to Dashboard
+    <div className={styles.pageContainer}>
+      <main className={styles.mainContent}>
+        <div className={styles.backLinkContainer}>
+          <Link href="/dashboard" className={styles.backLink}>
+            ← Back to Dashboard
           </Link>
         </div>
 
-        <article className="p-6 sm:p-8 bg-white rounded-xl shadow-xl border border-slate-200">
-          <header className="pb-4 mb-6 border-b border-slate-200">
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
-              Session Note
-            </h1>
-            <div className="text-sm text-slate-500 space-y-1.5">
+        <article className={styles.articleCard}>
+          <header className={styles.articleHeader}>
+            <h1 className={styles.title}>Session Note</h1>
+            <div className={styles.detailsMeta}>
               <p>
-                <strong className="font-medium text-slate-600">
-                  Note ID:
-                </strong>{' '}
-                {noteId}
+                <strong>Note ID:</strong> {noteId}
               </p>
               <p>
-                <strong className="font-medium text-slate-600">
-                  Session Date:
-                </strong>{' '}
+                <strong>Session Date:</strong>{' '}
                 {sessionDate.toLocaleDateString(undefined, {
                   year: 'numeric',
                   month: 'long',
@@ -102,9 +69,7 @@ export default async function NotePage({ params: { noteId } }: NotePageProps) {
                 })}
               </p>
               <p>
-                <strong className="font-medium text-slate-600">
-                  Note Created:
-                </strong>{' '}
+                <strong>Note Created:</strong>{' '}
                 {createdAtDate.toLocaleDateString(undefined, {
                   day: 'numeric',
                   month: 'short',
@@ -119,18 +84,14 @@ export default async function NotePage({ params: { noteId } }: NotePageProps) {
               </p>
               {noteData.originalAudioFileName && (
                 <p>
-                  <strong className="font-medium text-slate-600">
-                    Original Audio:
-                  </strong>{' '}
+                  <strong>Original Audio:</strong>{' '}
                   {noteData.originalAudioFileName}
                 </p>
               )}
               {noteData.status && (
                 <p>
-                  <strong className="font-medium text-slate-600">
-                    Status:
-                  </strong>{' '}
-                  <span className="ml-1 px-2 py-0.5 bg-sky-100 text-sky-700 text-xs font-semibold rounded-full">
+                  <strong>Status:</strong>{' '}
+                  <span className={styles.statusBadge}>
                     {noteData.status}
                   </span>
                 </p>
@@ -138,20 +99,18 @@ export default async function NotePage({ params: { noteId } }: NotePageProps) {
             </div>
           </header>
 
-          <section className="mb-8">
-            <h2 className="text-xl font-semibold text-slate-800 mb-3">
-              Transcript
-            </h2>
-            <pre className="p-4 text-sm leading-relaxed bg-slate-50 rounded-lg shadow-inner whitespace-pre-wrap max-h-[300px] overflow-y-auto border border-slate-200">
+          <section className={styles.contentSection}>
+            <h2 className={styles.sectionTitle}>Transcript</h2>
+            <pre className={styles.textBlock}>
               {noteData.transcript || 'No transcript available.'}
             </pre>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-slate-800 mb-3">
+            <h2 className={styles.sectionTitle}>
               SOAP Note / Structured Content
             </h2>
-            <div className="p-4 text-sm leading-relaxed bg-slate-50 rounded-lg shadow-inner whitespace-pre-wrap border border-slate-200">
+            <div className={styles.textBlock}>
               {noteData.structuredContent ||
                 'No structured note content available.'}
             </div>
