@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TheraScript",
+  title: "Terapai",
   description: "HIPAA-compliant AI note assistant for therapists",
 };
 

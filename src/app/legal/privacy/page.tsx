@@ -10,7 +10,7 @@ export default function PrivacyPage() {
       <p className="mb-4">Effective Date: [Insert Date]</p>
 
       <p className="mb-4">
-        TheraScript ("we," "our," or "us") is committed to protecting the privacy and security of our users. This Privacy Policy explains how we collect, use, and safeguard the information you provide when using our application.
+        Terapai ("we," "our," or "us") is committed to protecting the privacy and security of our users. This Privacy Policy explains how we collect, use, and safeguard the information you provide when using our application.
       </p>
 
       <h2 className="text-xl font-semibold mt-8 mb-2">1. Information We Collect</h2>

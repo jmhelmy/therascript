@@ -122,12 +122,16 @@
     font-size: 1.5rem;
     font-weight: 600;
     color: #0f172a;
+    font-size: 1.1rem;
+
   }
   
   .emptyStateText {
     margin-bottom: 1.5rem;
     color: #475569;
     line-height: 1.625;
+    font-size: 1.1rem;
+    font-weight: 600;
   }
   
   /* HIPAA badge */

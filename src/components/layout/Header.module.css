@@ -1,0 +1,60 @@
+.header {
+  width: 100%;
+  padding: 1rem 2rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #213650;
+  text-decoration: none;
+}
+
+.navLinks {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.navButton, .navButtonSecondary {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid transparent;
+}
+
+.navButton {
+  color: var(--color-card);
+  background-color: var(--color-primary);
+}
+
+.navButton:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 131, 143, 0.2);
+}
+
+.navButtonSecondary {
+  color: var(--color-primary);
+  background-color: transparent;
+  border-color: var(--color-border);
+}
+
+.navButtonSecondary:hover {
+  background-color: var(--color-accent-light);
+  border-color: var(--color-accent-light);
+}

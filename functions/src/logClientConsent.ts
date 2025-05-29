@@ -2,6 +2,7 @@
 import * as functions from "firebase-functions/v1";
 import { adminApp, db } from "./common/adminSdk"; // Import adminApp and db
 import { LogClientConsentData } from "./types"; // LogClientConsentResult might be needed if you define it
+import { logAudit } from "./services/auditService";
 
 export const logClientConsentFunction = functions.https.onCall(
   async (data: LogClientConsentData, context: functions.https.CallableContext) => {
@@ -26,7 +27,16 @@ export const logClientConsentFunction = functions.https.onCall(
 
     try {
       const docRef = await db.collection("consents").add(logEntry);
-      functions.logger.info("Consent logged successfully", { logId: docRef.id, therapistId: authenticatedTherapistId, sessionId: logEntry.sessionId });
+      // Audit log entry
+      await logAudit("logConsent", authenticatedTherapistId, docRef.id);
+
+
+      functions.logger.info("Consent logged successfully", { 
+        logId: docRef.id, 
+        therapistId: authenticatedTherapistId, 
+        sessionId: logEntry.sessionId 
+      }
+    );
       return { success: true, message: "Consent logged successfully.", logId: docRef.id };
     } catch (error: unknown) {
       let errorMessage = "Consent logging failed.";

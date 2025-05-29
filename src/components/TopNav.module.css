@@ -64,8 +64,8 @@
   }
   
   .hipaaIcon {
-    width: 44px;
-    height: 24px;
+    width: 60px;
+    height: 28px;
     /* This property prevents the image from being stretched or squished,
        which can cause blurriness. It respects the image's aspect ratio. */  
     /* This tells the browser to prioritize sharpness over smoothing when

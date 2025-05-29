@@ -12,6 +12,7 @@ import { transcodeWebMtoPCM } from "./services/transcoder";
 import { transcribePCMWithAzure } from "./services/azureSpeechService";
 import { generateSOAPNote } from "./services/azureOpenAIService";
 import { saveNote } from "./services/firestoreService";
+import { logAudit } from "./services/auditService";
 import { GenerateNoteData, GenerateNoteResult } from "./types";
 
 const app = express();
@@ -36,11 +37,15 @@ app.post(
 
       if (!therapistId) {
         functions.logger.error("Auth failed: no UID");
-        res.status(403).json({ success: false, error: "Not authenticated." } as GenerateNoteResult);
+        res
+          .status(403)
+          .json({ success: false, error: "Not authenticated." } as GenerateNoteResult);
         return;
       }
 
-      functions.logger.info(`Starting generateNote for ${therapistId}, file ${audioFileName}`);
+      functions.logger.info(
+        `Starting generateNote for ${therapistId}, file ${audioFileName}`
+      );
 
       // 1. Download raw audio
       const rawAudio = await downloadAudio(audioFileName);
@@ -73,12 +78,22 @@ app.post(
         originalAudioFileName: audioFileName,
       });
 
+      // 7. Audit log
+      await logAudit("generateNote", therapistId, noteId);
+
       functions.logger.info("Note saved with ID:", noteId);
-      res.status(200).json({ success: true, noteId, message: "Note generated and saved." } as GenerateNoteResult);
+      res
+        .status(200)
+        .json({ success: true, noteId, message: "Note generated and saved." } as GenerateNoteResult);
 
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Internal error";
-      functions.logger.error("generateNote error:", { msg, therapistId, audioFileName, err });
+      functions.logger.error("generateNote error:", {
+        msg,
+        therapistId,
+        audioFileName,
+        err,
+      });
       res.status(500).json({ success: false, error: msg } as GenerateNoteResult);
     }
   }
@@ -87,11 +102,3 @@ app.post(
 export const generateNoteHttpFunction = functions
   .runWith({ timeoutSeconds: 540, memory: "1GB" })
   .https.onRequest(app);
-
-  await db.collection('auditLogs').add({
-    userId: therapistId,
-    action: 'generateNote',
-    targetId: noteId,
-    timestamp: admin.firestore.FieldValue.serverTimestamp()
-  });
-  

@@ -1,6 +1,8 @@
+// src/lib/firestore.ts
+
 import firebase from 'firebase/app';
 import 'firebase/firestore';
-import { db } from './firebaseConfig'; // Assuming you have initialized Firestore in firebaseConfig.ts
+import { firestore } from './firebaseConfig'; // Updated import
 
 export interface TherapySessionNote {
   therapistId: string;
@@ -9,12 +11,13 @@ export interface TherapySessionNote {
   sessionDate: firebase.firestore.Timestamp;
 }
 
-export async function saveTherapySessionNote(note: TherapySessionNote): Promise<firebase.firestore.DocumentReference> {
-  try {
-    const docRef = await db.collection('therapySessionNotes').add(note);
-    return docRef;
-  } catch (error) {
-    console.error('Error saving therapy session note:', error);
-    throw error; // Re-throw the error for handling in the calling component
-  }
+/**
+ * Saves a therapy session note to Firestore.
+ * @param note The TherapySessionNote to save.
+ * @returns A promise resolving to the new document reference.
+ */
+export function saveTherapySessionNote(
+  note: TherapySessionNote
+): Promise<firebase.firestore.DocumentReference> {
+  return firestore.collection('therapySessionNotes').add(note);
 }

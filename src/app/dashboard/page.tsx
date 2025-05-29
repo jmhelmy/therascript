@@ -131,8 +131,7 @@ export default function DashboardPage() {
 
               <h2>No session notes yet</h2>
               <p className={styles.emptyStateText}>
-                You’re all set—create your first clinical note now, and we’ll
-                handle the rest.
+                Try 1 hour for free, and then it is $1.50 per hour. 
               </p>
 
               <div className={styles.buttonGroup}>
@@ -142,7 +141,6 @@ export default function DashboardPage() {
                 >
                   Start a New Session
                 </Button>
-                <Button variant="secondary">Try 1 hour free, then $1/hr</Button>
               </div>
             </div>
           ) : (

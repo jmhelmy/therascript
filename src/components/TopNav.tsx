@@ -14,11 +14,11 @@ export function TopNav() {
         <Link href="/dashboard" className={styles.brand}>
           <Image
             src="/couchicon2.png" // IMPORTANT: Replace with your actual logo path
-            alt="TheraScript Logo"
+            alt="terapai Logo"
             width={32}
             height={32}
           />
-          TheraScript
+          terapai
         </Link>
       </div>
 
