@@ -3,6 +3,10 @@
 import Link from 'next/link';
 import styles from './PricingPage.module.css';
 
+// Import your reusable Header and Footer components
+import { Header } from '@/components/layout/Header'; // Adjust path if necessary
+import { Footer } from '@/components/layout/Footer'; // Adjust path if necessary
+
 // Example SVG Icons (replace with your actual icons or a library)
 const CheckCircleIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={styles.featureIcon}>
@@ -76,19 +80,7 @@ export default function PricingPage() {
   return (
     <div className={styles.pageContainer}>
       {/* Header (You might want to make this a reusable component) */}
-      <header className={styles.header}>
-        <Link href="/" className={styles.logo}>
-          TheraScript
-        </Link>
-        <nav className={styles.navLinks}>
-          <Link href="/login" className={styles.navButtonSecondary}>
-            Log In
-          </Link>
-          <Link href="/register" className={styles.navButton}>
-            Sign Up Free
-          </Link>
-        </nav>
-      </header>
+      <Header />
 
       {/* Pricing Section */}
       <main className={styles.pricingSection}>
@@ -170,20 +162,8 @@ export default function PricingPage() {
           </div>
         </div>
       </section>
-
-      {/* Footer (You might want to make this a reusable component) */}
-      <footer className={styles.footer}>
-        <div className={styles.footerContent}>
-          <p className={styles.logo}>TheraScript</p>
-          <div className={styles.footerLinks}>
-              <Link href="/features" className={styles.footerLink}>Features</Link>
-              <Link href="/pricing" className={styles.footerLink}>Pricing</Link>
-              <Link href="/legal/terms" className={styles.footerLink}>Terms of Service</Link>
-              <Link href="/legal/privacy" className={styles.footerLink}>Privacy Policy</Link>
-          </div>
-          <p className={styles.copyright}>&copy; {new Date().getFullYear()} TheraScript. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
+    
   );
 }

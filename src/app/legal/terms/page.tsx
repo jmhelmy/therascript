@@ -1,9 +1,15 @@
 
 
 import React from 'react';
+// Import your reusable Header and Footer components
+import { Header } from '@/components/layout/Header'; // Adjust path if necessary
+import { Footer } from '@/components/layout/Footer'; // Adjust path if necessary
 
+<Header />
 export default function TermsPage() {
   return (
+    <>
+    <Header />
     <main className="max-w-3xl mx-auto py-12 px-4">
       <h1 className="text-3xl font-bold mb-6">Terms of Use</h1>
 
@@ -58,5 +64,7 @@ export default function TermsPage() {
         Questions? Email us at: [Insert Contact Email]
       </p>
     </main>
+    <Footer />
+    </>
   );
 }

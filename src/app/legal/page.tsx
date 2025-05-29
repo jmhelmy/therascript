@@ -4,6 +4,11 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import styles from './LegalAgreementPage.module.css';
 
+// Import your reusable Header and Footer components
+import { Header } from '@/components/layout/Header'; // Adjust path if necessary
+import { Footer } from '@/components/layout/Footer'; // Adjust path if necessary
+
+
 export default function LegalAgreementPage() {
   const router = useRouter();
   const [agreed, setAgreed] = useState(false);
@@ -14,6 +19,7 @@ export default function LegalAgreementPage() {
     router.push('/dashboard');
   };
 
+  <Header />
   return (
     <div className={styles.legalContainer}>
       <div className={styles.card}>
