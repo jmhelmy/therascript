@@ -37,6 +37,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.transcodeWebMtoPCM = transcodeWebMtoPCM;
+// functions/src/services/transcoder.ts
 const functions = __importStar(require("firebase-functions/v1"));
 const fluent_ffmpeg_1 = __importDefault(require("fluent-ffmpeg"));
 const ffmpeg_static_1 = __importDefault(require("ffmpeg-static"));

@@ -3,7 +3,7 @@
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true,        // ← ignore type mismatches in external libs
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,

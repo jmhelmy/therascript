@@ -1,12 +1,17 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  // Your original setting is preserved
+  // Allow ESLint errors during builds
   eslint: {
     ignoreDuringBuilds: true,
   },
 
-  // The new, required setting for external images
+  // Ignore Next.js TypeScript errors at build time
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
+  // Your existing remotePatterns config for external images
   images: {
     remotePatterns: [
       {

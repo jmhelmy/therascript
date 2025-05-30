@@ -56,6 +56,35 @@
   text-align: left; /* For button elements */
 }
 
+/* In Header.module.css */
+
+.signUpButton {
+  background-color: #00838f; /* Solid background with your primary color */
+  color: white;
+  padding: 10px 22px; /* Adjusted padding for pill shape */
+  border: none; /* No border */
+  border-radius: 50px; /* Fully rounded edges for a pill shape */
+  font-weight: 500; /* Medium font weight */
+  text-decoration: none; /* Ensure no underline from Link */
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease; /* Smooth transitions */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  display: inline-block; /* Ensures padding and other block-level props work well */
+}
+
+.signUpButton:hover,
+.signUpButton:focus {
+  background-color: #00737e; /* Slightly darker shade on hover/focus */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Slightly larger shadow on hover */
+  transform: translateY(-1px); /* Slight lift effect */
+}
+
+.signUpButton:active {
+  background-color: #006069; /* Even darker shade for active state */
+  transform: translateY(0px); /* Press down effect */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .navLink:hover {
   color: var(--color-primary, #00838f);
   background-color: rgba(0, 0, 0, 0.05);

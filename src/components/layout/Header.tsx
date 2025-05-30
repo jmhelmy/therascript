@@ -1,20 +1,43 @@
+// src/components/layout/Header.tsx
+'use client';
 
-"use client";
+import Link from 'next/link';
+import Image from 'next/image';
+import { useState, useEffect, useRef } from 'react';
+import styles from './Header.module.css';
 
-import Link from "next/link";
-import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
-import styles from "./Header.module.css";
-
-// Helper component for individual navigation links for cleaner code
-const NavLink = ({ href, children, onClick }: { href: string; children: React.ReactNode; onClick?: () => void }) => (
-  <Link href={href} className={styles.navLink} onClick={onClick}>
+// NavLink: Updated to remove legacyBehavior and accept an optional custom className
+const NavLink = ({
+  href,
+  children,
+  onClick,
+  className, // Optional custom className prop
+}: {
+  href: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string; // Prop type for custom className
+}) => (
+  <Link
+    href={href}
+    // Combine the default navLink style with any custom className passed
+    className={`${styles.navLink} ${className || ''}`.trim()}
+    onClick={onClick}
+  >
     {children}
   </Link>
 );
 
-// Helper component for dropdown links
-const DropdownLink = ({ href, children, onClick }: { href: string; children: React.ReactNode; onClick?: () => void }) => (
+// DropdownLink: Updated to remove legacyBehavior
+const DropdownLink = ({
+  href,
+  children,
+  onClick,
+}: {
+  href: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+}) => (
   <Link href={href} className={styles.dropdownLink} onClick={onClick}>
     {children}
   </Link>
@@ -23,61 +46,66 @@ const DropdownLink = ({ href, children, onClick }: { href: string; children: Rea
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
+  const [isSolutionsDropdownOpen, setIsSolutionsDropdownOpen] = useState(false);
+
   const companyDropdownRef = useRef<HTMLDivElement>(null);
+  const solutionsDropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const toggleCompanyDropdown = () => {
-    setIsCompanyDropdownOpen(!isCompanyDropdownOpen);
-  };
+  const toggleMobileMenu = () => setIsMobileMenuOpen((open) => !open);
+  const toggleCompanyDropdown = () => setIsCompanyDropdownOpen((open) => !open);
+  const toggleSolutionsDropdown = () => setIsSolutionsDropdownOpen((open) => !open);
 
   const closeAllMenus = () => {
     setIsMobileMenuOpen(false);
     setIsCompanyDropdownOpen(false);
+    setIsSolutionsDropdownOpen(false);
   };
 
-  // Close company dropdown if clicked outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (companyDropdownRef.current && !companyDropdownRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        companyDropdownRef.current &&
+        !companyDropdownRef.current.contains(e.target as Node)
+      ) {
         setIsCompanyDropdownOpen(false);
       }
+      if (
+        solutionsDropdownRef.current &&
+        !solutionsDropdownRef.current.contains(e.target as Node)
+      ) {
+        setIsSolutionsDropdownOpen(false);
+      }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    // Cleanup function to reset overflow when component unmounts
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : 'unset';
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [isMobileMenuOpen]);
 
+  const solutionsDropdownItems = [
+    { href: '/solutions/ai-notes', label: 'AI-Assisted Notes' },
+    { href: '/solutions/session-insights', label: 'Session Insights' },
+    { href: '/solutions/emr-integration', label: 'EMR Integration', comingSoon: true },
+  ];
 
+  // "Features" item removed from navItems
   const navItems = [
-    { href: "/features", label: "Features" },
-    { href: "/pricing", label: "Pricing" },
-    { href: "/soap-guide", label: "SOAP Guide" },
-    { href: "/blog", label: "Blog" },
+    { href: '/pricing', label: 'Pricing' },
+    { href: '/soap-guide', label: 'SOAP Guide' },
+    { href: '/blog', label: 'Blog' },
   ];
 
   const companyDropdownItems = [
-    { href: "/about", label: "About Us" },
-    { href: "/faq", label: "FAQ" },
-    { href: "/about/security", label: "Security" },
-    { href: "/legal/privacy", label: "Privacy Policy" },
+    { href: '/about', label: 'About Us' },
+    { href: '/faq', label: 'FAQ' },
+    { href: '/about/security', label: 'Security' },
+    { href: '/legal/privacy', label: 'Privacy Policy' },
   ];
 
   return (
@@ -92,27 +120,88 @@ export function Header() {
         <span>Terapai</span>
       </Link>
 
-      {/* Desktop Navigation */}
       <nav className={styles.desktopNav}>
+        {/* Solutions Dropdown - Using same styling classes as Company for consistency */}
+        <div
+          className={styles.companyDropdownContainer} // Changed to use existing class for styling consistency
+          ref={solutionsDropdownRef}
+        >
+          <button
+            type="button"
+            className={styles.navLink}
+            onClick={toggleSolutionsDropdown}
+            aria-expanded={isSolutionsDropdownOpen}
+            aria-controls="solutions-dropdown"
+          >
+            Solutions{' '}
+            <span
+              className={`${styles.arrow} ${
+                isSolutionsDropdownOpen ? styles.arrowUp : ''
+              }`}
+            >
+              &#9662;
+            </span>
+          </button>
+          {isSolutionsDropdownOpen && (
+            <div
+              className={styles.companyDropdown} // Changed to use existing class for styling consistency
+              id="solutions-dropdown"
+            >
+              {solutionsDropdownItems.map((item) => (
+                <DropdownLink
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeAllMenus}
+                >
+                  {item.label}
+                  {item.comingSoon && <span className={styles.comingSoonTag}> (coming soon)</span>}
+                </DropdownLink>
+              ))}
+            </div>
+          )}
+        </div>
+
         {navItems.map((item) => (
-          <NavLink key={item.href} href={item.href} onClick={closeAllMenus}>
+          <NavLink
+            key={item.href}
+            href={item.href}
+            onClick={closeAllMenus}
+          >
             {item.label}
           </NavLink>
         ))}
-        <div className={styles.companyDropdownContainer} ref={companyDropdownRef}>
+
+        <div
+          className={styles.companyDropdownContainer}
+          ref={companyDropdownRef}
+        >
           <button
             type="button"
-            className={styles.navLink} // Or a new specific class for dropdown trigger
+            className={styles.navLink}
             onClick={toggleCompanyDropdown}
             aria-expanded={isCompanyDropdownOpen}
             aria-controls="company-dropdown"
           >
-            Company <span className={`${styles.arrow} ${isCompanyDropdownOpen ? styles.arrowUp : ''}`}>&#9662;</span>
+            Company{' '}
+            <span
+              className={`${styles.arrow} ${
+                isCompanyDropdownOpen ? styles.arrowUp : ''
+              }`}
+            >
+              &#9662;
+            </span>
           </button>
           {isCompanyDropdownOpen && (
-            <div className={styles.companyDropdown} id="company-dropdown">
+            <div
+              className={styles.companyDropdown}
+              id="company-dropdown"
+            >
               {companyDropdownItems.map((item) => (
-                <DropdownLink key={item.href} href={item.href} onClick={closeAllMenus}>
+                <DropdownLink
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeAllMenus}
+                >
                   {item.label}
                 </DropdownLink>
               ))}
@@ -122,15 +211,19 @@ export function Header() {
       </nav>
 
       <div className={styles.desktopAuthButtons}>
-        <Link href="/login" className={styles.navButtonSecondary} onClick={closeAllMenus}>
+        <NavLink href="/login" onClick={closeAllMenus}>
           Log In
-        </Link>
-        <Link href="/register" className={styles.navButton} onClick={closeAllMenus}>
+        </NavLink>
+        {/* Apply a specific class for the Sign Up button */}
+        <NavLink
+          href="/register"
+          onClick={closeAllMenus}
+          className={styles.signUpButton} // Added custom class
+        >
           Sign Up Free
-        </Link>
+        </NavLink>
       </div>
 
-      {/* Hamburger Button - only for mobile */}
       <button
         type="button"
         className={styles.hamburgerButton}
@@ -139,62 +232,104 @@ export function Header() {
         aria-expanded={isMobileMenuOpen}
         aria-controls="mobile-menu"
       >
-        <span className={`${styles.hamburgerLine} ${isMobileMenuOpen ? styles.line1Open : ''}`}></span>
-        <span className={`${styles.hamburgerLine} ${isMobileMenuOpen ? styles.line2Open : ''}`}></span>
-        <span className={`${styles.hamburgerLine} ${isMobileMenuOpen ? styles.line3Open : ''}`}></span>
+        <span
+          className={`${styles.hamburgerLine} ${
+            isMobileMenuOpen ? styles.line1Open : ''
+          }`}
+        />
+        <span
+          className={`${styles.hamburgerLine} ${
+            isMobileMenuOpen ? styles.line2Open : ''
+          }`}
+        />
+        <span
+          className={`${styles.hamburgerLine} ${
+            isMobileMenuOpen ? styles.line3Open : ''
+          }`}
+        />
       </button>
 
-      {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
-         <div
-          className={`${styles.mobileNavOverlay} ${isMobileMenuOpen ? styles.mobileNavOverlayActive : ''}`}
-          onClick={toggleMobileMenu} // Close on overlay click
+        <div
+          className={`${styles.mobileNavOverlay} ${
+            styles.mobileNavOverlayActive
+          }`}
+          onClick={toggleMobileMenu}
         >
           <nav
             id="mobile-menu"
-            className={`${styles.mobileNav} ${isMobileMenuOpen ? styles.mobileNavOpen : ''}`}
+            className={`${styles.mobileNav} ${
+              isMobileMenuOpen ? styles.mobileNavOpen : ''
+            }`}
             ref={mobileMenuRef}
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside menu
+            onClick={(e) => e.stopPropagation()}
             aria-hidden={!isMobileMenuOpen}
           >
             <div className={styles.mobileNavHeader}>
-                 <Link href="/" className={styles.logo} onClick={closeAllMenus}>
-                    <Image
-                    src="/couchicon2.png"
-                    alt="Terapai Logo"
-                    width={36}
-                    height={36}
-                    />
-                    <span>Terapai</span>
-                </Link>
-                <button
-                    type="button"
-                    className={styles.mobileCloseButton}
-                    onClick={toggleMobileMenu}
-                    aria-label="Close menu"
-                >
-                    &times; {/* A simple 'X' icon */}
-                </button>
+              <Link href="/" className={styles.logo} onClick={closeAllMenus}>
+                <Image
+                  src="/couchicon2.png"
+                  alt="Terapai Logo"
+                  width={36}
+                  height={36}
+                />
+                <span>Terapai</span>
+              </Link>
+              <button
+                type="button"
+                className={styles.mobileCloseButton}
+                onClick={toggleMobileMenu}
+                aria-label="Close menu"
+              >
+                &times;
+              </button>
             </div>
+
+            <div className={styles.mobileDropdownTrigger}>Solutions</div>
+            {solutionsDropdownItems.map((item) => (
+              <NavLink
+                key={item.href}
+                href={item.href}
+                onClick={closeAllMenus}
+              >
+                {item.label}
+                {item.comingSoon && <span className={styles.comingSoonTag}> (coming soon)</span>}
+              </NavLink>
+            ))}
+            
             {navItems.map((item) => (
-              <NavLink key={item.href} href={item.href} onClick={closeAllMenus}>
+              <NavLink
+                key={item.href}
+                href={item.href}
+                onClick={closeAllMenus}
+              >
                 {item.label}
               </NavLink>
             ))}
+
             <div className={styles.mobileDropdownTrigger}>Company</div>
             {companyDropdownItems.map((item) => (
-               // Using NavLink styles for mobile dropdown items for consistency
-              <NavLink key={item.href} href={item.href} onClick={closeAllMenus} >
-                <span className={styles.mobileDropdownItemPrefix}>&↳</span> {item.label}
+              <NavLink
+                key={item.href}
+                href={item.href}
+                onClick={closeAllMenus}
+              >
+                {item.label}
               </NavLink>
             ))}
+
             <div className={styles.mobileAuthButtons}>
-              <Link href="/login" className={styles.navButtonSecondary} onClick={closeAllMenus}>
+              <NavLink href="/login" onClick={closeAllMenus}>
                 Log In
-              </Link>
-              <Link href="/register" className={styles.navButton} onClick={closeAllMenus}>
+              </NavLink>
+              {/* Apply a specific class for the Sign Up button in mobile view */}
+              <NavLink
+                href="/register"
+                onClick={closeAllMenus}
+                className={styles.signUpButton} // Added custom class
+              >
                 Sign Up Free
-              </Link>
+              </NavLink>
             </div>
           </nav>
         </div>

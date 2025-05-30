@@ -1,4 +1,5 @@
 "use strict";
+// functions/src/generateNote.ts
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -37,71 +38,75 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateNoteHttpFunction = void 0;
-// functions/src/generateNote.ts
 const functions = __importStar(require("firebase-functions/v1"));
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
-// Import your utility and service functions
-const authenticate_1 = require("./utils/authenticate"); // This will use adminApp.auth()
-const storage_1 = require("./services/storage"); // These use defaultBucket from adminSdk
-const transcoder_1 = require("./services/transcoder");
-const azureSpeechService_1 = require("./services/azureSpeechService");
+// Utility/service imports
+const authenticate_1 = require("./utils/authenticate");
+const storage_1 = require("./services/storage");
+const whisperService_1 = require("./services/whisperService");
 const azureOpenAIService_1 = require("./services/azureOpenAIService");
-const firestoreService_1 = require("./services/firestoreService"); // This will use adminApp.firestore.Timestamp
+const firestoreService_1 = require("./services/firestoreService");
+const auditService_1 = require("./services/auditService");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({ origin: true }));
 app.use(express_1.default.json());
 app.post("/", authenticate_1.authenticate, async (req, res) => {
-    // ... (Your existing, refactored orchestrator logic from response #145) ...
-    // This logic calls the service functions which now use adminApp internally
-    let therapistIdFromAuth;
-    let audioFileNameFromRequest;
+    let therapistId;
+    let audioFileName;
     try {
-        // @ts-ignore user is attached by the authenticate middleware
-        const firebaseUser = req.user; // admin type here is from global firebase-admin
-        therapistIdFromAuth = firebaseUser.uid;
-        const { audioFileName, sessionDate } = req.body;
-        audioFileNameFromRequest = audioFileName;
-        if (!therapistIdFromAuth) {
-            functions.logger.error("Authentication failed, therapistId not found.");
-            res.status(403).json({ success: false, error: "Authentication failed." });
+        // @ts-ignore — set by authenticate middleware
+        const userToken = req.user;
+        therapistId = userToken.uid;
+        const body = req.body;
+        audioFileName = body.audioFileName;
+        const sessionDate = body.sessionDate;
+        if (!therapistId) {
+            functions.logger.error("Auth failed: no UID");
+            res
+                .status(403)
+                .json({ success: false, error: "Not authenticated." });
             return;
         }
-        // ... (rest of the input validation) ...
-        functions.logger.info(`Http Trigger: Starting generateNote for therapist: ${therapistIdFromAuth}, audioFile: ${audioFileNameFromRequest}`);
-        const rawAudioBuffer = await (0, storage_1.downloadAudio)(audioFileNameFromRequest);
-        functions.logger.info("Audio downloaded successfully.");
-        const pcmBuffer = await (0, transcoder_1.transcodeWebMtoPCM)(rawAudioBuffer);
-        functions.logger.info("Audio transcoded to PCM successfully.");
-        await (0, storage_1.deleteAudio)(audioFileNameFromRequest);
-        functions.logger.info("Original audio file deleted after transcoding.");
-        const transcript = await (0, azureSpeechService_1.transcribePCMWithAzure)(pcmBuffer);
+        functions.logger.info(`Starting generateNote for ${therapistId}, file ${audioFileName}`);
+        // 1. Transcribe via Whisper
+        functions.logger.info("Transcriber: calling Whisper service");
+        const transcript = await (0, whisperService_1.transcribeWithWhisper)(audioFileName);
         if (!transcript)
-            throw new Error("Transcription returned empty result.");
-        functions.logger.info("Transcription successful.");
+            throw new Error("Empty transcript");
+        functions.logger.info("Transcription complete.");
+        // 2. Delete raw audio immediately
+        await (0, storage_1.deleteAudio)(audioFileName);
+        functions.logger.info(`Deleted original audio: ${audioFileName}`);
+        // 3. Generate SOAP note via OpenAI
         const structuredContent = await (0, azureOpenAIService_1.generateSOAPNote)(transcript);
         if (!structuredContent)
-            throw new Error("Note generation returned empty result.");
-        functions.logger.info("SOAP note generated successfully.");
+            throw new Error("Empty SOAP note");
+        functions.logger.info("SOAP note generated.");
+        // 4. Persist note in Firestore
         const noteId = await (0, firestoreService_1.saveNote)({
-            therapistId: therapistIdFromAuth,
+            therapistId,
             sessionDate,
             transcript,
-            structuredContent: structuredContent,
-            originalAudioFileName: audioFileNameFromRequest,
+            structuredContent,
+            originalAudioFileName: audioFileName,
         });
-        functions.logger.info("Note ID received from saveNote service:", noteId);
-        res.status(200).json({ success: true, noteId, message: "Note generated and saved successfully." });
+        // 5. Audit log
+        await (0, auditService_1.logAudit)("generateNote", therapistId, noteId);
+        functions.logger.info("Note saved with ID:", noteId);
+        res
+            .status(200)
+            .json({ success: true, noteId, message: "Note generated and saved." });
     }
     catch (err) {
-        const errorMessage = (err instanceof Error && err.message) ? err.message : "An internal error occurred during note processing.";
-        functions.logger.error("Error in generateNote main try/catch:", {
-            errorMessage,
-            originalError: err,
-            therapistId: therapistIdFromAuth || "N/A",
-            audioFile: audioFileNameFromRequest || "N/A"
+        const msg = err instanceof Error ? err.message : "Internal error";
+        functions.logger.error("generateNote error:", {
+            msg,
+            therapistId,
+            audioFileName,
+            err,
         });
-        res.status(500).json({ success: false, error: errorMessage });
+        res.status(500).json({ success: false, error: msg });
     }
 });
 exports.generateNoteHttpFunction = functions

@@ -1,7 +1,7 @@
 // functions/src/services/auditService.ts
 
 import * as admin from 'firebase-admin';
-import { dbAdmin } from '../common/adminSdk';
+import { db } from '../common/adminSdk'; // ✅ FIXED: use `db`, not `dbAdmin`
 
 export interface AuditLogEntry {
   action: string;          // e.g. "generateNote", "logConsent"
@@ -24,5 +24,5 @@ export async function logAudit(
     targetId,
     timestamp: admin.firestore.FieldValue.serverTimestamp()
   };
-  return dbAdmin.collection('auditLogs').add(entry);
+  return db.collection('auditLogs').add(entry); // ✅ also renamed here
 }

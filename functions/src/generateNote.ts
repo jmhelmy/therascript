@@ -7,9 +7,8 @@ import corsMiddleware from "cors";
 
 // Utility/service imports
 import { authenticate } from "./utils/authenticate";
-import { downloadAudio, deleteAudio } from "./services/storage";
-import { transcodeWebMtoPCM } from "./services/transcoder";
-import { transcribePCMWithAzure } from "./services/azureSpeechService";
+import { deleteAudio } from "./services/storage";
+import { transcribeWithWhisper } from "./services/whisperService";
 import { generateSOAPNote } from "./services/azureOpenAIService";
 import { saveNote } from "./services/firestoreService";
 import { logAudit } from "./services/auditService";
@@ -47,29 +46,22 @@ app.post(
         `Starting generateNote for ${therapistId}, file ${audioFileName}`
       );
 
-      // 1. Download raw audio
-      const rawAudio = await downloadAudio(audioFileName);
-      functions.logger.info("Audio downloaded.");
-
-      // 2. Transcode to PCM
-      const pcmBuffer = await transcodeWebMtoPCM(rawAudio);
-      functions.logger.info("Transcoded to PCM.");
-
-      // 3. Delete raw audio immediately
-      await deleteAudio(audioFileName);
-      functions.logger.info(`Deleted original audio: ${audioFileName}`);
-
-      // 4. Transcribe via Azure
-      const transcript = await transcribePCMWithAzure(pcmBuffer);
+      // 1. Transcribe via Whisper
+      functions.logger.info("Transcriber: calling Whisper service");
+      const transcript = await transcribeWithWhisper(audioFileName);
       if (!transcript) throw new Error("Empty transcript");
       functions.logger.info("Transcription complete.");
 
-      // 5. Generate SOAP note via OpenAI
+      // 2. Delete raw audio immediately
+      await deleteAudio(audioFileName);
+      functions.logger.info(`Deleted original audio: ${audioFileName}`);
+
+      // 3. Generate SOAP note via OpenAI
       const structuredContent = await generateSOAPNote(transcript);
       if (!structuredContent) throw new Error("Empty SOAP note");
       functions.logger.info("SOAP note generated.");
 
-      // 6. Persist note in Firestore
+      // 4. Persist note in Firestore
       const noteId = await saveNote({
         therapistId,
         sessionDate,
@@ -78,7 +70,7 @@ app.post(
         originalAudioFileName: audioFileName,
       });
 
-      // 7. Audit log
+      // 5. Audit log
       await logAudit("generateNote", therapistId, noteId);
 
       functions.logger.info("Note saved with ID:", noteId);

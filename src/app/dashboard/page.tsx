@@ -1,4 +1,7 @@
 'use client';
+import("firebase/auth").then(({ getAuth }) => {
+  getAuth().currentUser?.getIdToken().then(console.log);
+});
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -23,6 +26,8 @@ import styles from './DashboardPage.module.css';
 
 interface DisplayNote extends NoteCardProps {}
 
+
+
 export default function DashboardPage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -31,15 +36,25 @@ export default function DashboardPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
 
-  // Auth listener
-  useEffect(() => {
-    const unsub = auth.onAuthStateChanged((u) => {
-      if (u) setUser(u);
-      else router.push('/login');
-      setAuthLoading(false);
-    });
-    return () => unsub();
-  }, [router]);
+// Auth listener
+useEffect(() => {
+  const unsub = auth.onAuthStateChanged((u) => {
+    if (u) {
+      setUser(u);
+
+      // 🔥 Add this to log the token
+      u.getIdToken().then((token) => {
+        console.log("🔥 Firebase ID Token:", token);
+      });
+    } else {
+      router.push('/login');
+    }
+    setAuthLoading(false);
+  });
+
+  return () => unsub();
+}, [router]);
+
 
   // Firestore listener
   useEffect(() => {

@@ -1,31 +1,69 @@
 // src/app/soap-guide/[professionSlug]/[issueSlug]/page.tsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use, Suspense, lazy, ComponentType } from 'react'; // Added Suspense, lazy, ComponentType
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import styles from '../../SoapPage.module.css'; // Go up one level for the CSS module
-import { guideCategories, GuideCategory, Subtopic } from '../../data'; // Go up one level for data
+import styles from '../../SoapPage.module.css';
+import { guideCategories, GuideCategory, Subtopic } from '../../data';
 
-interface IssuePageProps {
-  params: {
-    professionSlug: string;
-    issueSlug: string;
-  };
+// Define the expected shape of the resolved params
+interface ResolvedIssueParams {
+  professionSlug: string;
+  issueSlug: string;
 }
 
-export default function IssueGuidePage({ params }: IssuePageProps) {
+interface IssuePageProps {
+  params: ResolvedIssueParams;
+}
+
+// Helper function to create a map for lazy loading issue components
+// This map helps React.lazy work with dynamic strings more predictably
+const createIssueComponentMap = (): Record<string, Record<string, ComponentType<any>>> => {
+  const components: Record<string, Record<string, ComponentType<any>>> = {};
+  guideCategories.forEach(category => {
+    if (category.isGroup && category.subtopics) {
+      components[category.slug] = {};
+      category.subtopics.forEach(subtopic => {
+        // Construct the component name based on convention (e.g., LowBackPainContent)
+        // This requires consistent naming of your content files.
+        const capFirst = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+        const componentNameParts = subtopic.slug.split('-').map(capFirst);
+        const componentName = componentNameParts.join('') + 'Content';
+        
+        try {
+            components[category.slug][subtopic.slug] = lazy(() =>
+            import(`../../_issue-content/${category.slug}/${componentName}`)
+          );
+        } catch (e) {
+            console.warn(`Component for ${category.slug}/${componentName} not found or failed to import.`)
+            // You might want a fallback component here or handle it in rendering
+        }
+      });
+    }
+  });
+  return components;
+};
+
+const IssueContentComponents = createIssueComponentMap();
+
+
+export default function IssueGuidePage({ params: paramsInput }: IssuePageProps) {
+  const params = use(paramsInput as Promise<ResolvedIssueParams> | ResolvedIssueParams);
   const { professionSlug, issueSlug } = params;
+
   const pathname = usePathname();
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
   const currentProfession = guideCategories.find(cat => cat.slug === professionSlug && cat.isGroup);
   const currentIssue = currentProfession?.subtopics?.find(sub => sub.slug === issueSlug);
 
-   useEffect(() => {
-    // Pre-expand the current profession's subtopics
+  // Dynamically get the Issue Content Component
+  const IssueSpecificContent = IssueContentComponents[professionSlug]?.[issueSlug];
+
+  useEffect(() => {
     if (currentProfession) {
       setExpandedGroups(prev => ({ ...prev, [professionSlug]: true }));
     }
@@ -35,22 +73,12 @@ export default function IssueGuidePage({ params }: IssuePageProps) {
     setExpandedGroups(prev => ({ ...prev, [slug]: !prev[slug] }));
   };
 
-  // Active link logic
   let currentActiveGroupSlug = professionSlug;
-  let currentActiveSubSlug = `<span class="math-inline">\{professionSlug\}/</span>{issueSlug}`;
-
+  let currentActiveSubSlug = `${professionSlug}/${issueSlug}`;
 
   if (!currentProfession || !currentIssue) {
-    return (
-      <>
-        <Header />
-        <main className={styles.pageContainer}>
-          <h1 className={styles.title}>SOAP Note Example Not Found</h1>
-          <p className={styles.paragraph}>The requested SOAP note example could not be found.</p>
-        </main>
-        <Footer />
-      </>
-    );
+    notFound();
+    return null;
   }
 
   return (
@@ -58,6 +86,7 @@ export default function IssueGuidePage({ params }: IssuePageProps) {
       <Header />
       <div className={styles.mainLayout}>
         <aside className={styles.sidebar}>
+          {/* ... Your full sidebar JSX ... */}
           <h2 className={styles.sidebarTitle}>SOAP Note Guides</h2>
           <nav>
             <ul className={styles.navList}>
@@ -65,10 +94,9 @@ export default function IssueGuidePage({ params }: IssuePageProps) {
                 <li key={category.slug} className={styles.navItem}>
                   <Link
                     href={category.path}
-                    className={`${styles.navLink} ${currentActiveGroupSlug === category.slug ? styles.navLinkActive : ''}`}
-                     onClick={(e) => {
+                    className={`${styles.navLink} ${currentActiveGroupSlug === category.slug && !currentActiveSubSlug.startsWith(category.slug + '/') ? styles.navLinkActive : ''}`}
+                    onClick={(e) => {
                       if (category.isGroup && category.subtopics && category.subtopics.length > 0) {
-                        // e.preventDefault();
                         toggleGroup(category.slug);
                       }
                     }}
@@ -80,12 +108,12 @@ export default function IssueGuidePage({ params }: IssuePageProps) {
                       </span>
                     )}
                   </Link>
-                  {category.isGroup && category.subtopics && expandedGroups[category.slug] && (
-                     <ul className={`${styles.subNavList} ${expandedGroups[category.slug] ? styles.subNavListExpanded : styles.subNavListCollapsed}`}>
+                  {category.isGroup && category.subtopics && (
+                    <ul className={`${styles.subNavList} ${expandedGroups[category.slug] ? styles.subNavListExpanded : styles.subNavListCollapsed}`}>
                       {category.subtopics.map(subtopic => (
                         <li key={subtopic.slug} className={styles.subNavItem}>
                           <Link
-                            href={`<span class="math-inline">\{category\.path\}/</span>{subtopic.slug}`}
+                            href={`${category.path}/${subtopic.slug}`}
                             className={`${styles.subNavLink} ${currentActiveSubSlug === `${category.slug}/${subtopic.slug}` ? styles.subNavLinkActive : ''}`}
                           >
                             {subtopic.name}
@@ -101,56 +129,17 @@ export default function IssueGuidePage({ params }: IssuePageProps) {
         </aside>
 
         <main className={styles.contentArea}>
-          {/* Breadcrumbs (Optional but good for UX) */}
           <div className={styles.breadcrumbs}>
             <Link href="/soap-guide">SOAP Guides</Link> &gt; {}
             <Link href={currentProfession.path}>{currentProfession.name}</Link> &gt; {}
             <span>{currentIssue.name}</span>
           </div>
 
-          <h1 className={styles.title}>{currentIssue.name} - SOAP Note Example</h1>
-          <h2 className={styles.subheading}>Scenario for {currentProfession.name}</h2>
-          <p className={styles.paragraph}>
-            {/* TODO: Describe the patient scenario for this example. */}
-            This section will detail a common clinical scenario encountered in {currentProfession.name} practice involving {currentIssue.name.toLowerCase().replace(' example', '')}.
-          </p>
-
-          <section>
-            <h3 className={styles.sectionSubSubHeading}>Subjective (S)</h3>
-            <div className={styles.soapSectionContent}>
-              {/* TODO: Add Subjective content for this example */}
-              <p>Patient reports...</p>
-            </div>
-          </section>
-          <section>
-            <h3 className={styles.sectionSubSubHeading}>Objective (O)</h3>
-            <div className={styles.soapSectionContent}>
-              {/* TODO: Add Objective content for this example */}
-              <p>On examination...</p>
-            </div>
-          </section>
-          <section>
-            <h3 className={styles.sectionSubSubHeading}>Assessment (A)</h3>
-            <div className={styles.soapSectionContent}>
-              {/* TODO: Add Assessment content for this example */}
-              <p>Diagnosis: ...</p>
-            </div>
-          </section>
-          <section>
-            <h3 className={styles.sectionSubSubHeading}>Plan (P)</h3>
-            <div className={styles.soapSectionContent}>
-              {/* TODO: Add Plan content for this example */}
-              <p>1. Further tests... <br/>2. Treatment... <br/>3. Patient education...</p>
-            </div>
-          </section>
-
-          <section>
-            <h2 className={styles.subheading}>Key Considerations for {currentIssue.name} Notes</h2>
-            <p className={styles.paragraph}>
-              {/* TODO: Add specific tips or considerations when writing SOAP notes for this issue/profession. */}
-            </p>
-          </section>
-
+          <h1 className={styles.title}>{currentIssue.name}</h1>
+          
+          <Suspense fallback={<div className={styles.paragraph}>Loading example...</div>}>
+            {IssueSpecificContent ? <IssueSpecificContent /> : <p className={styles.paragraph}>Detailed example content for "{currentIssue.name}" in {currentProfession.name} is coming soon or could not be loaded.</p>}
+          </Suspense>
         </main>
       </div>
       <Footer />
