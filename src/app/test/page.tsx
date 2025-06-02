@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { initializeApp, getApps } from "firebase/app";
-import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
@@ -19,17 +18,21 @@ if (!getApps().length) {
 
 export default function DebugTokenPage() {
   useEffect(() => {
-    const auth = getAuth();
-    const user = auth.currentUser;
+    const fetchToken = async () => {
+      const { getAuth } = await import("firebase/auth");
+      const auth = getAuth();
 
-    if (!user) {
-      console.log("⚠️ No user is signed in.");
-      return;
-    }
+      const user = auth.currentUser;
+      if (!user) {
+        console.log("⚠️ No user is signed in.");
+        return;
+      }
 
-    user.getIdToken().then((token) => {
+      const token = await user.getIdToken();
       console.log("🔥 Firebase ID Token:", token);
-    });
+    };
+
+    fetchToken();
   }, []);
 
   return <div>Debugging Firebase token... check the console.</div>;

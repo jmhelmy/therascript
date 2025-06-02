@@ -3,7 +3,7 @@
 
 import React from 'react';
 import styles from './PrivacyPage.module.css'; // Import the CSS module
-import { Header } from '@/components/layout/Header'; // Adjust path if necessary
+import { Header } from '@/components/layout/Header/Header'; // Adjust path if necessary
 import { Footer } from '@/components/layout/Footer'; // Adjust path if necessary
 
 export default function PrivacyPage() {

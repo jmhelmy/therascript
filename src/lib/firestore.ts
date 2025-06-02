@@ -1,23 +1,30 @@
-// src/lib/firestore.ts
+// lib/firestore.ts
 
-import firebase from 'firebase/app';
-import 'firebase/firestore';
-import { firestore } from './firebaseConfig'; // Updated import
+// 1) Import the Firebase “compat” SDK so that `firebase.firestore` is defined:
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 
+// 2) Re‐export Timestamp and FieldValue from the compat namespace:
+export const CompatTimestamp = firebase.firestore.Timestamp;
+export const compatServerTimestamp = (): firebase.firestore.FieldValue => {
+  return firebase.firestore.FieldValue.serverTimestamp();
+};
+
+// 3) If you need types elsewhere, alias them here:
+export type FirestoreTimestamp = firebase.firestore.Timestamp;
+export type FirestoreFieldValue = firebase.firestore.FieldValue;
+
+// 4) Example interface using those types:
 export interface TherapySessionNote {
   therapistId: string;
-  createdAt: firebase.firestore.Timestamp;
+  createdAt: FirestoreTimestamp | FirestoreFieldValue; // serverTimestamp() yields a FieldValue
   structuredContent: string;
-  sessionDate: firebase.firestore.Timestamp;
+  sessionDate: FirestoreTimestamp;
+  id?: string;
 }
 
-/**
- * Saves a therapy session note to Firestore.
- * @param note The TherapySessionNote to save.
- * @returns A promise resolving to the new document reference.
- */
-export function saveTherapySessionNote(
-  note: TherapySessionNote
-): Promise<firebase.firestore.DocumentReference> {
-  return firestore.collection('therapySessionNotes').add(note);
-}
+// 5) (Optional) You could export a helper to get the Firestore instance:
+// export const db = firebase.firestore();
+
+// 6) Ensure this file is treated as a module:
+export {};

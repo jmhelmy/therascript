@@ -1,28 +1,36 @@
-// src/firebase/saveTherapySessionNote.ts
-import { 
-  collection, 
-  addDoc, 
-  serverTimestamp, 
-  Timestamp // For explicit Date to Timestamp conversion if needed
-} from "firebase/firestore";
-import { authInstance, dbInstance } from "@/lib/firebaseConfig"; // Adjust path if your firebaseConfig is elsewhere
+// src/lib/saveTherapySessionNote.ts
+import firebase from 'firebase/compat/app'; // Import the main firebase compat object
+import 'firebase/compat/auth';            // Import for side effect: adds firebase.auth()
+import 'firebase/compat/firestore';       // Import for side effect: adds firebase.firestore()
 
-// Define an interface for the note data for type safety
+// Access Timestamp and serverTimestamp via the firebase.firestore namespace
+const Timestamp = firebase.firestore.Timestamp;
+const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp;
+
+// Define an interface for the note data
 export interface TherapySessionNoteData {
   therapistId: string;
-  createdAt: any; // Will be a serverTimestamp()
-  sessionDate: Timestamp | Date; // Can be a JS Date or Firestore Timestamp
+  createdAt: firebase.firestore.FieldValue; // Correct type for serverTimestamp()
+  sessionDate: firebase.firestore.Timestamp; // Store as Firestore Timestamp
   structuredContent: string;
-  // Add any other fields you might need for the note, e.g., sessionIdForLog
-  sessionIdForLog?: string; 
+  sessionIdForLog?: string;
 }
 
 export async function saveTherapySessionNote(
-  structuredContent: string, 
-  sessionDate: Date,
-  optionalSessionIdForLog?: string // Optional: if you want to link it to a specific consent log session ID
-): Promise<string> { // Returns the ID of the newly created document
-  const user = authInstance.currentUser;
+  structuredContent: string,
+  sessionDate: Date, // Expecting a JavaScript Date object from the caller
+  optionalSessionIdForLog?: string
+): Promise<string> {
+  // IMPORTANT: This assumes Firebase app has been initialized elsewhere,
+  // typically in a central 'src/lib/firebaseConfig.ts' using:
+  // if (!firebase.apps.length) {
+  //   firebase.initializeApp(firebaseConfigValues);
+  // }
+  // If not, you would need to initialize it here or import the initialized app.
+
+  const auth = firebase.auth(); // Get the compat auth instance
+  const firestore = firebase.firestore(); // Get the compat firestore instance
+  const user = auth.currentUser;
 
   if (!user) {
     console.error("User not authenticated. Cannot save note.");
@@ -31,9 +39,9 @@ export async function saveTherapySessionNote(
 
   const noteData: TherapySessionNoteData = {
     therapistId: user.uid,
-    createdAt: serverTimestamp(), // Firestore will set this to the server's timestamp
+    createdAt: serverTimestamp(), // Use the correctly accessed serverTimestamp
     sessionDate: Timestamp.fromDate(sessionDate), // Convert JS Date to Firestore Timestamp
-    structuredContent: structuredContent,
+    structuredContent,
   };
 
   if (optionalSessionIdForLog) {
@@ -41,12 +49,12 @@ export async function saveTherapySessionNote(
   }
 
   try {
-    const docRef = await addDoc(collection(dbInstance, "therapySessionNotes"), noteData);
-    console.log("Therapy session note saved with ID: ", docRef.id);
-    return docRef.id; // Return the new note's ID
+    // Use compat syntax for adding a document
+    const docRef = await firestore.collection("therapySessionNotes").add(noteData);
+    console.log("Therapy session note saved with ID:", docRef.id);
+    return docRef.id;
   } catch (error) {
     console.error("Error saving therapy session note to Firestore:", error);
-    // You might want to throw a more specific error or handle it differently
     throw new Error("Failed to save therapy note. Please try again.");
   }
 }

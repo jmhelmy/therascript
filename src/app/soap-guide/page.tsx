@@ -1,15 +1,20 @@
 // src/app/soap-guide/page.tsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react'; // Removed unused useEffect
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
+import { Header } from '@/components/layout/Header/Header';
 import { Footer } from '@/components/layout/Footer';
-import styles from './SoapPage.module.css'; // Assuming you kept SoapPage.module.css name
+import styles from './SoapPage.module.css';
 
-import { guideCategories, GuideCategory, Subtopic } from './data'; // Import from the new data file
+// Assuming './data' exports the GuideCategory and Subtopic types.
+// We are removing 'guideCategories' from this import because we define it below.
+import { type GuideCategory, type Subtopic } from './data'; // Use 'type' for type-only imports if your TS version supports it well
 
+// This is now the sole definition of guideCategories for this file.
+// Optionally, you can add the type for better safety if GuideCategory from './data' matches this structure:
+// const guideCategories: GuideCategory[] = [
 const guideCategories = [
   // General Guides
   { name: "Introduction to SOAP Notes", slug: "introduction", isGroup: false, path: "/soap-guide" },
@@ -115,10 +120,20 @@ export default function SoapGuideLandingPage() {
   let currentActiveSubSlug = "";
 
   const pathSegments = pathname.split('/').filter(Boolean); // e.g., ['soap-guide', 'physical-therapy', 'low-back-pain']
+
+  // Adjusted logic to better handle base /soap-guide page and specific slugs like "introduction"
   if (pathSegments[0] === 'soap-guide') {
-    if (pathSegments.length === 1) currentActiveGroupSlug = "introduction"; // Base /soap-guide page
-    if (pathSegments.length >= 2) currentActiveGroupSlug = pathSegments[1];
-    if (pathSegments.length >= 3) currentActiveSubSlug = pathSegments.slice(1).join('/'); // e.g., physical-therapy/low-back-pain
+    if (pathSegments.length === 1) {
+        // This is the base /soap-guide page. You might want to highlight "Introduction to SOAP Notes" by default
+        // or handle it based on whether "introduction" is a specific slug or just the content of this page.
+        // For now, let's assume if no other segment, "introduction" is implied for this page.
+        // You could also set a default active slug here if needed.
+    } else if (pathSegments.length === 2) {
+        currentActiveGroupSlug = pathSegments[1]; // e.g., "physical-therapy" or "introduction"
+    } else if (pathSegments.length >= 3) {
+        currentActiveGroupSlug = pathSegments[1]; // e.g., "physical-therapy"
+        currentActiveSubSlug = pathSegments.slice(1).join('/'); // e.g., "physical-therapy/low-back-pain"
+    }
   }
 
 
@@ -134,7 +149,13 @@ export default function SoapGuideLandingPage() {
                 <li key={category.slug} className={styles.navItem}>
                   <Link
                     href={category.path}
-                    className={`${styles.navLink} ${currentActiveGroupSlug === category.slug && !currentActiveSubSlug.startsWith(category.slug + '/') ? styles.navLinkActive : ''}`}
+                    // Updated active class logic:
+                    // Active if it's the current group and no sub-topic is active under a *different* group,
+                    // OR if it's a non-group item and its slug matches.
+                    className={`${styles.navLink} ${
+                        (currentActiveGroupSlug === category.slug && !currentActiveSubSlug.startsWith(category.slug + '/')) ||
+                        (currentActiveGroupSlug === category.slug && !category.isGroup)
+                         ? styles.navLinkActive : ''}`}
                     onClick={(e) => {
                       if (category.isGroup && category.subtopics && category.subtopics.length > 0) {
                         // e.preventDefault(); // Optional: prevent navigation if you only want to expand/collapse
@@ -145,7 +166,7 @@ export default function SoapGuideLandingPage() {
                     {category.name}
                     {category.isGroup && category.subtopics && category.subtopics.length > 0 && (
                       <span className={`${styles.arrow} ${expandedGroups[category.slug] ? styles.arrowUp : ''}`}>
-                        &#9662;
+                        &#9662; {/* Downwards arrow, CSS will rotate if arrowUp */}
                       </span>
                     )}
                   </Link>
@@ -187,7 +208,6 @@ export default function SoapGuideLandingPage() {
 
           <section>
             <h2 className={styles.subheading}>What Are SOAP Notes?</h2>
-             {/* ... (content remains the same) ... */}
             <ul className={styles.list}>
               <li className={styles.listItem}>
                 <strong>Subjective (S):</strong> This section captures the patient's personal experiences, symptoms, and history as reported by them or their caregiver. It includes the chief complaint, history of present illness, relevant past medical history, family history, social history, and review of systems.
@@ -206,7 +226,6 @@ export default function SoapGuideLandingPage() {
 
           <section>
             <h2 className={styles.subheading}>Why Are SOAP Notes Important?</h2>
-            {/* ... (content remains the same) ... */}
             <ol className={styles.numberedList}>
               <li className={styles.numberedListItem}>
                 <strong>Consistency & Standardization:</strong> They provide a uniform structure for recording patient information, making it easier for multiple healthcare providers to follow and understand the patient's history and care plan. This promotes interdisciplinary communication.

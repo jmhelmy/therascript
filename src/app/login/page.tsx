@@ -1,152 +1,97 @@
-"use client";
+// src/app/debug-token/page.tsx (or your chosen path)
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  signInWithEmailAndPassword,
-  RecaptchaVerifier,
-  MultiFactorResolver,
-  PhoneAuthProvider,
-  PhoneMultiFactorGenerator,
-  signInWithCredential,
-} from "firebase/auth";
-import { auth } from "@/lib/auth";
-import styles from "./LoginPage.module.css";
+import { useEffect, useState } from 'react';
+// Import the initialized auth instance from your central Firebase config
+// This assumes firebaseConfig.ts exports 'auth' correctly as we've discussed
+import { auth } from '@/lib/firebaseConfig'; // Make sure this path is correct for your project
+import type { User } from 'firebase/auth'; // For User type, can also be dynamically imported if preferred
 
-let recaptchaVerifier: RecaptchaVerifier;
+export default function DebugTokenPage() {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [idToken, setIdToken] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-export default function LoginPage() {
-  const router = useRouter();
+  useEffect(() => {
+    const setupAuthListenerAndFetchToken = async () => {
+      try {
+        // Dynamically import onAuthStateChanged from firebase/auth
+        // This aligns with the strategy to reduce static bundling issues
+        const { onAuthStateChanged } = await import('firebase/auth');
 
-  const [email, setEmail]                   = useState("");
-  const [password, setPassword]             = useState("");
-  const [error, setError]                   = useState("");
-  const [showMfaPrompt, setShowMfaPrompt]   = useState(false);
-  const [verificationId, setVerificationId] = useState("");
-  const [smsCode, setSmsCode]               = useState("");
-  const [resolver, setResolver]             = useState<MultiFactorResolver | null>(null);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard");
-    } catch (err: any) {
-      if (err.code === "auth/multi-factor-auth-required") {
-        const mfr = err.resolver as MultiFactorResolver;
-        setResolver(mfr);
-        setShowMfaPrompt(true);
-        const phoneInfo = mfr.hints[0];
-        if (phoneInfo.factorId === PhoneMultiFactorGenerator.FACTOR_ID) {
-          const provider = new PhoneAuthProvider(auth);
-          if (!recaptchaVerifier) {
-            recaptchaVerifier = new RecaptchaVerifier(
-              auth,
-              "recaptcha-container",
-              { size: "invisible", callback: () => {}, "expired-callback": () => setError("reCAPTCHA expired. Try again.") }
-            );
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+          setIsLoading(true); // Reset loading state on auth change
+          if (user) {
+            setCurrentUser(user);
+            console.log("User is signed in:", user.uid, user.email);
+            try {
+              const token = await user.getIdToken(true); // Pass true to force refresh if needed
+              console.log("🔥 Firebase ID Token:", token);
+              setIdToken(token);
+              setError(null);
+            } catch (tokenError: any) {
+              console.error("Error getting ID token:", tokenError);
+              setError(`Error getting ID token: ${tokenError.message || 'Unknown token error'}`);
+              setIdToken(null);
+            }
+          } else {
+            console.log("⚠️ No user is signed in.");
+            setCurrentUser(null);
+            setError("No user is currently signed in.");
+            setIdToken(null);
           }
-          const id = await provider.verifyPhoneNumber(
-            { phoneNumber: phoneInfo.phoneNumber, session: mfr.session },
-            recaptchaVerifier
-          );
-          setVerificationId(id);
-        } else {
-          setError("Unsupported MFA factor.");
-        }
-      } else {
-        setError(err.message);
-      }
-    }
-  };
+          setIsLoading(false);
+        });
 
-  const handleMfaSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (!resolver || !verificationId) {
-      setError("Missing MFA details.");
-      return;
-    }
-    try {
-      const phoneCred = PhoneAuthProvider.credential(verificationId, smsCode);
-      const multiCred = PhoneMultiFactorGenerator.credentialFromCredential(phoneCred)!;
-      await signInWithCredential(resolver, multiCred);
-      router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
+        // Cleanup function to unsubscribe when the component unmounts
+        return () => unsubscribe();
+
+      } catch (importError: any) {
+        console.error("Error importing Firebase Auth module:", importError);
+        setError(`Failed to load Firebase Auth: ${importError.message || 'Import error'}`);
+        setIsLoading(false);
+      }
+    };
+
+    setupAuthListenerAndFetchToken();
+  }, []); // Empty dependency array ensures this runs once on mount
+
+  if (isLoading) {
+    return <div>Loading user state and attempting to fetch token... check the console.</div>;
+  }
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.card}>
-        <h2 className={styles.title}>Login</h2>
+    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+      <h1>Firebase ID Token Debugger</h1>
+      {currentUser ? (
+        <p>
+          Signed in as: <strong>{currentUser.email || currentUser.uid}</strong>
+        </p>
+      ) : (
+        <p>No user is currently signed in.</p>
+      )}
 
-        { !showMfaPrompt ? (
-          <form onSubmit={handleLogin}>
-            <div className={styles.formGroup}>
-              <label htmlFor="email" className={styles.label}>Email</label>
-              <input
-                id="email"
-                type="email"
-                className={styles.input}
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-              />
-            </div>
+      {idToken && (
+        <div style={{ marginTop: '20px' }}>
+          <h3>✅ ID Token Fetched Successfully:</h3>
+          <textarea
+            readOnly
+            value={idToken}
+            rows={15}
+            style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'monospace', fontSize: '12px' }}
+          />
+        </div>
+      )}
 
-            <div className={styles.formGroup}>
-              <label htmlFor="password" className={styles.label}>Password</label>
-              <input
-                id="password"
-                type="password"
-                className={styles.input}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            {error && <p className={styles.error}>{error}</p>}
-
-            <button type="submit" className={styles.buttonPrimary}>
-              Login
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleMfaSignIn}>
-            <p>Please enter the verification code sent to your phone.</p>
-            <div className={styles.formGroup}>
-              <label htmlFor="smsCode" className={styles.label}>SMS Code</label>
-              <input
-                id="smsCode"
-                type="text"
-                className={styles.input}
-                value={smsCode}
-                onChange={e => setSmsCode(e.target.value)}
-                required
-              />
-            </div>
-            {error && <p className={styles.error}>{error}</p>}
-            <button
-              type="submit"
-              className={`${styles.buttonPrimary} ${styles.buttonVerify}`}
-            >
-              Verify Code
-            </button>
-          </form>
-        )}
-
-        <div id="recaptcha-container" className={styles.recaptchaContainer} />
-
-        <p className={styles.orText}>or</p>
-        <Link href="/" className={styles.homeLink}>
-          ← Back to Homepage
-        </Link>
-      </div>
+      {error && (
+        <p style={{ color: 'red', marginTop: '20px' }}>
+          <strong>Error:</strong> {error}
+        </p>
+      )}
+      <p style={{ marginTop: '20px' }}>
+        <em>(Check the browser's developer console for more detailed logs.)</em>
+      </p>
     </div>
   );
 }

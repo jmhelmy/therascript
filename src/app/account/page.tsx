@@ -1,34 +1,31 @@
+// src/app/account/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebaseConfig';
 import { TopNav } from '@/components/TopNav';
 import styles from './AccountPage.module.css';
 
+type SimpleUser = {
+  email: string | null;
+};
+
 export default function AccountPage() {
-  const [user, setUser] = useState(auth.currentUser);
+  const [user, setUser] = useState<SimpleUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Redirect to /login if not signed in
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged(u => {
-      if (!u) {
-        router.push('/login');
-      } else {
-        setUser(u);
-      }
+    // TEMP: Fake auth to test if Firebase is the issue
+    setTimeout(() => {
+      setUser({ email: 'debug@example.com' }); // fake user
       setLoading(false);
-    });
-    return unsub;
+    }, 1000);
   }, [router]);
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/login');
-  };
+  const handleLogout = useCallback(() => {
+    alert("Logged out (debug)");
+  }, []);
 
   const handlePlaceholder = (what: string) => {
     alert(`${what} feature not implemented yet.`);
@@ -37,7 +34,21 @@ export default function AccountPage() {
   if (loading) {
     return (
       <div className={styles.pageContainer}>
-        <p className={styles.loading}>Loading account…</p>
+        <TopNav />
+        <main className={styles.mainContent}>
+          <p className={styles.loading}>Loading account…</p>
+        </main>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className={styles.pageContainer}>
+        <TopNav />
+        <main className={styles.mainContent}>
+          <p>Verifying session or redirecting...</p>
+        </main>
       </div>
     );
   }
@@ -45,45 +56,46 @@ export default function AccountPage() {
   return (
     <div className={styles.pageContainer}>
       <TopNav />
-
       <main className={styles.mainContent}>
         <div className={styles.header}>
           <h1 className={styles.title}>My account</h1>
         </div>
-
-        <p className={styles.email}>{user?.email}</p>
-
+        <p className={styles.email}>{user.email}</p>
         <div className={styles.actions}>
           <button
             className={styles.actionButton}
             onClick={() => handlePlaceholder('Change Email')}
+            aria-label="Change email address"
           >
             Change Email
           </button>
           <button
             className={styles.actionButton}
             onClick={() => handlePlaceholder('Change Password')}
+            aria-label="Change password"
           >
             Change Password
           </button>
           <button
             className={styles.actionButton}
             onClick={() => handlePlaceholder('Manage Subscription')}
+            aria-label="Manage subscription"
           >
             Manage Subscription
           </button>
         </div>
-
         <div className={styles.footer}>
           <button
             className={styles.buttonPrimary}
             onClick={() => handlePlaceholder('Get Help')}
+            aria-label="Get help"
           >
             Get Help
           </button>
           <button
             className={styles.buttonLogout}
             onClick={handleLogout}
+            aria-label="Log out of account"
           >
             Logout
           </button>
@@ -94,6 +106,7 @@ export default function AccountPage() {
                 handlePlaceholder('Delete Account');
               }
             }}
+            aria-label="Delete account"
           >
             Delete Account
           </button>

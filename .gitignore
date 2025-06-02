@@ -44,3 +44,16 @@ next-env.d.ts
 # firebase debug and secrets
 firebase-debug.log
 functions/.runtimeconfig.json
+
+# Firebase function build output
+functions/lib/
+functions/node_modules/
+
+functions/lib/
+functions/node_modules/
+
+# Firebase + Next.js extras
+functions/node_modules/
+.next/
+node_modules/
+.vercel/

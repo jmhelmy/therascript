@@ -11,18 +11,31 @@ if (!speechCfg.key || !speechCfg.region) {
   throw new Error("Azure Speech service not configured.");
 }
 
-// your existing transcription function below, using speechCfg.key & speechCfg.region
+/**
+ * Transcribes a 16kHz mono PCM buffer using Azure Speech Services (one‐shot).
+ * @param pcmBuffer - Node.js Buffer containing raw PCM audio.
+ * @returns Transcribed text as a Promise<string>.
+ */
 export async function transcribePCMWithAzure(pcmBuffer: Buffer): Promise<string> {
   const { key, region } = speechCfg;
-  functions.logger.info("AzureSpeech: Beginning transcription, bufferLength=", pcmBuffer.length);
+  functions.logger.info(
+    "AzureSpeech: Beginning transcription, bufferLength=",
+    pcmBuffer.length
+  );
+
   const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(key, region);
   speechConfig.speechRecognitionLanguage = "en-US";
 
-  // Create a push stream and feed in the PCM buffer
+  // Convert Node.js Buffer → ArrayBuffer
+  const arrayBuffer = pcmBuffer.buffer.slice(
+    pcmBuffer.byteOffset,
+    pcmBuffer.byteOffset + pcmBuffer.byteLength
+  ) as ArrayBuffer;
+
   const pushStream = SpeechSDK.AudioInputStream.createPushStream(
     SpeechSDK.AudioStreamFormat.getWaveFormatPCM(16000, 16, 1)
   );
-  pushStream.write(pcmBuffer);
+  pushStream.write(arrayBuffer);
   pushStream.close();
 
   const audioConfig = SpeechSDK.AudioConfig.fromStreamInput(pushStream);
@@ -32,18 +45,19 @@ export async function transcribePCMWithAzure(pcmBuffer: Buffer): Promise<string>
     recognizer.recognizeOnceAsync(
       (result) => {
         recognizer.close();
-
         switch (result.reason) {
           case SpeechSDK.ResultReason.RecognizedSpeech: {
             const text = result.text.trim();
-            functions.logger.info("AzureSpeech: Recognized text", { length: text.length });
-            return resolve(text);
+            functions.logger.info("AzureSpeech: Recognized text", {
+              length: text.length,
+            });
+            resolve(text);
+            break;
           }
-
-          case SpeechSDK.ResultReason.NoMatch: {
-            functions.logger.warn("AzureSpeech: No speech could be recognized.");
-            return reject(new Error("No speech recognized in audio."));
-          }
+          case SpeechSDK.ResultReason.NoMatch:
+            functions.logger.warn("AzureSpeech: No speech recognized.");
+            reject(new Error("No speech recognized in audio."));
+            break;
 
           case SpeechSDK.ResultReason.Canceled: {
             const cancelDetails = SpeechSDK.CancellationDetails.fromResult(result);
@@ -51,13 +65,15 @@ export async function transcribePCMWithAzure(pcmBuffer: Buffer): Promise<string>
               reason: cancelDetails.reason,
               errorDetails: cancelDetails.errorDetails,
             });
-            return reject(new Error(`Transcription canceled: ${cancelDetails.errorDetails}`));
+            reject(new Error(`Transcription canceled: ${cancelDetails.errorDetails}`));
+            break;
           }
 
-          default: {
-            functions.logger.error("AzureSpeech: Unknown recognition result reason", { reason: result.reason });
-            return reject(new Error(`Transcription failed with reason: ${result.reason}`));
-          }
+          default:
+            functions.logger.error("AzureSpeech: Unknown reason", {
+              reason: result.reason,
+            });
+            reject(new Error(`Transcription failed with reason: ${result.reason}`));
         }
       },
       (err) => {

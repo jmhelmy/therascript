@@ -1,177 +1,74 @@
 'use client';
-import("firebase/auth").then(({ getAuth }) => {
-  getAuth().currentUser?.getIdToken().then(console.log);
-});
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import CaduceusIcon from '@/components/CaduceusIcon';
-import Button from '@/components/Button';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import { useState } from 'react';
 import Link from 'next/link';
-import { User as FirebaseUser } from 'firebase/auth';
-import { auth, firestore as db } from '@/lib/firebaseConfig';
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  onSnapshot,
-  Timestamp as FirestoreTimestamp,
-  DocumentData,
-  QueryDocumentSnapshot,
-} from 'firebase/firestore';
-import { TopNav } from '@/components/TopNav';
-import { NoteCard, NoteCardProps } from '@/components/NoteCard';
+import { useRouter } from 'next/navigation';
 import styles from './DashboardPage.module.css';
 
-interface DisplayNote extends NoteCardProps {}
-
-
-
-export default function DashboardPage() {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [notes, setNotes] = useState<DisplayNote[]>([]);
-  const [notesLoading, setNotesLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const router = useRouter();
-
-// Auth listener
-useEffect(() => {
-  const unsub = auth.onAuthStateChanged((u) => {
-    if (u) {
-      setUser(u);
-
-      // 🔥 Add this to log the token
-      u.getIdToken().then((token) => {
-        console.log("🔥 Firebase ID Token:", token);
-      });
-    } else {
-      router.push('/login');
-    }
-    setAuthLoading(false);
+// Initialize once (outside the component)
+if (!firebase.apps.length) {
+  firebase.initializeApp({
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
   });
+}
+const auth = firebase.auth();
 
-  return () => unsub();
-}, [router]);
+export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail]       = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError]       = useState('');
 
-
-  // Firestore listener
-  useEffect(() => {
-    if (!user) return;
-    setNotesLoading(true);
-    setErrorMessage(null);
-
-    const notesRef = collection(db, 'therapySessionNotes');
-    const q = query(
-      notesRef,
-      where('therapistId', '==', user.uid),
-      orderBy('sessionDate', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snap) => {
-        const arr: DisplayNote[] = [];
-        snap.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
-          const d = doc.data();
-          const date =
-            d.sessionDate instanceof FirestoreTimestamp
-              ? d.sessionDate.toDate()
-              : new Date();
-          arr.push({
-            id: doc.id,
-            date,
-            clientInitials: d.clientInitials || 'N/A',
-            summary: d.structuredContent || d.summary || 'No summary.',
-          });
-        });
-        setNotes(arr);
-        setNotesLoading(false);
-      },
-      (err) => {
-        setErrorMessage(err.message);
-        setNotesLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [user]);
-
-  // Loading state
-  if (authLoading) {
-    return (
-      <div className={styles.pageContainer}>
-        <TopNav />
-        <div className={styles.spinnerWrapper}>
-          <div className={styles.spinner} />
-          <p className={styles.loadingText}>Loading user session…</p>
-        </div>
-      </div>
-    );
-  }
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    try {
+      await auth.signInWithEmailAndPassword(email, password);
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Login failed.');
+    }
+  };
 
   return (
-    <div className={styles.pageContainer}>
-      <TopNav />
-      <div className={styles.wrapper}>
-        <header className={styles.header}>
-          {user && (
-            <p className={styles.welcomeText}>
-              Welcome back, <strong>{user.email}</strong>!
-            </p>
-          )}
-          <Link href="/session/record" passHref>
-            <Button variant="primary">+ New Session Note</Button>
-          </Link>
-        </header>
-
-        <main className={styles.mainContent}>
-          {errorMessage && (
-            <div className={styles.alert}>
-              Error loading notes: {errorMessage}
-            </div>
-          )}
-
-          {notesLoading ? (
-            <div className={styles.spinnerWrapper}>
-              <div className={styles.spinner} />
-              <p className={styles.loadingText}>
-                Loading your session notes…
-              </p>
-            </div>
-          ) : notes.length === 0 ? (
-            <div className={styles.emptyState}>
-              <CaduceusIcon className={styles.hipaaBadge} />
-
-              <h2>No session notes yet</h2>
-              <p className={styles.emptyStateText}>
-                Try 1 hour for free, and then it is $1.50 per hour. 
-              </p>
-
-              <div className={styles.buttonGroup}>
-                <Button
-                  variant="primary"
-                  onClick={() => router.push('/session/record')}
-                >
-                  Start a New Session
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className={styles.notesList}>
-              {notes.map((note) => (
-                <NoteCard
-                  key={note.id}
-                  id={note.id}
-                  date={note.date}
-                  clientInitials={note.clientInitials}
-                  summary={note.summary}
-                />
-              ))}
-            </div>
-          )}
-        </main>
+    <div className={styles.wrapper}>
+      <div className={styles.card}>
+        <h2 className={styles.title}>Login</h2>
+        <form onSubmit={handleLogin}>
+          <div className={styles.formGroup}>
+            <label htmlFor="email" className={styles.label}>Email</label>
+            <input
+              id="email"
+              type="email"
+              className={styles.input}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="password" className={styles.label}>Password</label>
+            <input
+              id="password"
+              type="password"
+              className={styles.input}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          {error && <p className={styles.error}>{error}</p>}
+          <button type="submit" className={styles.buttonPrimary}>Login</button>
+        </form>
+        <p className={styles.orText}>or</p>
+        <Link href="/" className={styles.homeLink}>← Back to Homepage</Link>
       </div>
     </div>
   );

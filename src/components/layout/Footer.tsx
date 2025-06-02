@@ -1,5 +1,3 @@
-// components/layout/Footer.tsx
-
 "use client";
 
 import Link from "next/link";
@@ -21,20 +19,5 @@ export function Footer() {
         </p>
       </div>
     </footer>
-  );
-} 
-
-
-// usage in pages/index.tsx or HomePage.tsx
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-
-export default function HomePage() {
-  return (
-    <div className={styles.pageContainer}>
-      <Header />
-      {/* ... main page content ... */}
-      <Footer />
-    </div>
   );
 }

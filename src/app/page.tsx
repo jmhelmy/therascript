@@ -1,11 +1,15 @@
-// src/app/page.tsx 
-import { Header } from "@/components/layout/Header";
+// src/app/page.tsx
+
+import { Header } from "@/components/layout/Header/Header";
 import { Footer } from "@/components/layout/Footer";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./HomePage.module.css";
-import { ShieldCheckIcon, SparklesIcon, DocumentTextIcon } 
-  from "@/components/icons/Icons";
+import {
+  ShieldCheckIcon,
+  SparklesIcon,
+  DocumentTextIcon,
+} from "@/components/icons/Icons";
 
 export default function HomePage() {
   return (
@@ -54,12 +58,16 @@ export default function HomePage() {
         </div>
         <div className={styles.featuresGrid}>
           <div className={styles.featureCard}>
-            <div className={styles.featureIconWrapper}><DocumentTextIcon /></div>
+            <div className={styles.featureIconWrapper}>
+              <DocumentTextIcon />
+            </div>
             <h3>Effortless Documentation</h3>
             <p>Transform your sessions into perfectly structured SOAP notes in minutes.</p>
           </div>
           <div className={styles.featureCard}>
-            <div className={styles.featureIconWrapper}><SparklesIcon /></div>
+            <div className={styles.featureIconWrapper}>
+              <SparklesIcon />
+            </div>
             <h3>Your AI Clinical Advisor</h3>
             <p>Our AI analyzes session context to suggest interventions and improve judgment.</p>
           </div>

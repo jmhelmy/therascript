@@ -4,7 +4,7 @@ import Link from 'next/link';
 import styles from './PricingPage.module.css';
 
 // Import your reusable Header and Footer components
-import { Header } from '@/components/layout/Header'; // Adjust path if necessary
+import { Header } from '@/components/layout/Header/Header'; // Adjust path if necessary
 import { Footer } from '@/components/layout/Footer'; // Adjust path if necessary
 
 // Example SVG Icons (replace with your actual icons or a library)

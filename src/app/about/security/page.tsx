@@ -1,6 +1,6 @@
 // app/about/security/page.tsx
 import React from 'react';
-import { Header } from '@/components/layout/Header'; // Assuming this is the correct path
+import { Header } from '@/components/layout/Header/Header'; // Assuming this is the correct path
 import { Footer } from '@/components/layout/Footer'; // Assuming this is the correct path
 import styles from './SecurityPage.module.css';
 

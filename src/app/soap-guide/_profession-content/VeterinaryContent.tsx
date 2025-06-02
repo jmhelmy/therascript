@@ -4,7 +4,7 @@
 import React, { useState, useEffect, Suspense, lazy, ComponentType } from 'react';
 import Link from 'next/link';
 import { usePathname, notFound } from 'next/navigation'; // Import notFound
-import { Header } from '@/components/layout/Header';
+import { Header } from '@/components/layout/Header/Header';
 import { Footer } from '@/components/layout/Footer';
 import styles from '../SoapPage.module.css'; // Path to your shared CSS module
 import { guideCategories, GuideCategory } from '../data';
