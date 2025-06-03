@@ -23,6 +23,7 @@ export interface TherapySessionNoteData {
   originalAudioFileName: string;
   status: string;
   sessionId: string; // ← required by your Firestore rules
+  structuredContent: string;
 }
 
 export async function saveTherapySessionNote(

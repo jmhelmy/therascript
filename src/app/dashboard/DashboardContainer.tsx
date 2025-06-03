@@ -19,13 +19,14 @@ export default function DashboardContainer() {
   const fetchSessions = async () => {
     setLoading(true);
     try {
-      const user = auth.currentUser;
-      if (!user) {
-        console.error('No user logged in');
+      const currentUser = auth.currentUser;
+
+      if (!currentUser) {
+        router.push('/login');
         return;
       }
 
-      const token = await user.getIdToken();
+      const token = await currentUser.getIdToken();
       console.log('Got token:', token.substring(0, 20) + '...');
 
       const response = await fetch('/api/sessions', {
@@ -43,7 +44,6 @@ export default function DashboardContainer() {
       console.log('🔥 typeof data:', typeof data);
       console.log('🔥 Array.isArray(data):', Array.isArray(data));
 
-      // Safely handle the array response
       const parsed: NoteItem[] = data.map((session: any) => {
         console.log('👀 Individual session before parsing:', session);
         return {
@@ -62,7 +62,6 @@ export default function DashboardContainer() {
     } catch (error) {
       console.error('Error fetching sessions:', error);
       setError('Failed to load sessions');
-    } finally {
       setLoading(false);
     }
   };
@@ -91,7 +90,6 @@ export default function DashboardContainer() {
         throw new Error(`Failed to update session: ${res.status}`);
       }
 
-      // Refresh the sessions list
       await fetchSessions();
     } catch (err: any) {
       console.error('Error updating session:', err);
@@ -109,7 +107,6 @@ export default function DashboardContainer() {
         throw new Error(`Failed to delete session: ${res.status}`);
       }
 
-      // Refresh the sessions list
       await fetchSessions();
     } catch (err: any) {
       console.error('Error deleting session:', err);

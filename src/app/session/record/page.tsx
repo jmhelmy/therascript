@@ -92,7 +92,7 @@ export default function RecordSessionPage() {
             console.error('❌ Audio processing or save failed:', errorMsg);
             setRecorderStatus('Audio processing failed. Please try again.');
           }
-        }, token);
+        });
       });
     }
   }, [isRecording, audioBlob, user, didAutoProcess, processAudio, router, sessionId, setRecorderStatus]);
@@ -140,7 +140,7 @@ export default function RecordSessionPage() {
 
         {!hasStarted && (
           <p className={styles.disclaimer}>
-            By proceeding to record, you confirm you’ve obtained patient consent.
+            By proceeding to record, you confirm you've obtained patient consent.
           </p>
         )}
 

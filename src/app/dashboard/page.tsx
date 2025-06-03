@@ -7,7 +7,7 @@ import 'firebase/compat/auth';
 import DashboardContainer from './DashboardContainer';
 import TopNav from '@/components/TopNav';
 
-// ✅ Initialize Firebase if it isn’t already
+// ✅ Initialize Firebase if it isn't already
 if (!firebase.apps.length) {
   firebase.initializeApp({
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
@@ -45,10 +45,16 @@ export default function DashboardPage() {
     return <p style={{ padding: '2rem', textAlign: 'center' }}>Loading dashboard…</p>;
   }
 
+  // Sanitize providerData to remove nulls
+  const safeUser = user && {
+    ...user,
+    providerData: user.providerData.filter((p): p is firebase.UserInfo => p !== null)
+  };
+
   return (
     <>
       <TopNav />
-      <DashboardContainer user={user!} />
+      <DashboardContainer user={safeUser!} />
     </>
   );
 }

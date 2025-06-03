@@ -4,7 +4,7 @@
 import { useState } from "react";
 import SessionTabs from "./SessionTabs";
 import TranscriptTab from "./TranscriptTab";
-import NotesTab from "./NotesTab";
+import SoapNotesTab from "./SoapNotesTab";
 
 interface TranscriptEntry {
   speaker: number;
@@ -43,7 +43,9 @@ export default function SessionDetail({
       <SessionTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div style={{ marginTop: "1rem" }}>
-        {activeTab === "Notes" && <NotesTab notes={session.notes} />}
+        {activeTab === "SOAP Notes" && (
+          <SoapNotesTab sessionId={session.id} initialSoap={session.notes} />
+        )}
         {activeTab === "Transcript" && (
           <TranscriptTab transcript={session.transcript} />
         )}
