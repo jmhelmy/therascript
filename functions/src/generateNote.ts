@@ -12,6 +12,7 @@ import { transcodeWebMtoPCM } from "./services/transcoder";
 import { transcribePCMWithAzure } from "./services/azureSpeechService";
 import { generateSOAPNote } from "./services/azureOpenAIService";
 import { saveNote } from "./services/firestoreService";
+import { db } from "./common/adminSdk";
 import { GenerateNoteData, GenerateNoteResult } from "./types";
 
 const app = express();
@@ -74,6 +75,14 @@ app.post(
       });
 
       functions.logger.info("Note saved with ID:", noteId);
+
+      await db.collection('auditLogs').add({
+        userId: therapistId,
+        action: 'generateNote',
+        targetId: noteId,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
       res.status(200).json({ success: true, noteId, message: "Note generated and saved." } as GenerateNoteResult);
 
     } catch (err: unknown) {
@@ -87,11 +96,4 @@ app.post(
 export const generateNoteHttpFunction = functions
   .runWith({ timeoutSeconds: 540, memory: "1GB" })
   .https.onRequest(app);
-
-  await db.collection('auditLogs').add({
-    userId: therapistId,
-    action: 'generateNote',
-    targetId: noteId,
-    timestamp: admin.firestore.FieldValue.serverTimestamp()
-  });
   
