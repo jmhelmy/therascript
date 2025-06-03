@@ -33,6 +33,7 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 .env.local*
+.env.production
 
 # vercel
 .vercel
@@ -57,3 +58,5 @@ functions/node_modules/
 .next/
 node_modules/
 .vercel/
+firebase-admin-creds.json
+

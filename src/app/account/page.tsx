@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { TopNav } from '@/components/TopNav';
+import TopNav from '@/components/TopNav';
 import styles from './AccountPage.module.css';
 
 type SimpleUser = {

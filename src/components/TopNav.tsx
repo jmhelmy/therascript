@@ -4,8 +4,9 @@ import { usePathname } from 'next/navigation'; // Import to detect the active pa
 import styles from './TopNav.module.css';
 import CaduceusIcon from './CaduceusIcon';
 
-export function TopNav() {
-  const pathname = usePathname(); // Get the current URL path
+export default function TopNav() {  // ✅ now it's a default export
+  const pathname = usePathname();
+
 
   return (
     <nav className={styles.nav}>

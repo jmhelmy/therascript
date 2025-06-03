@@ -1,16 +1,17 @@
-// src/components/StatusBanner.tsx (or your path to it)
+// src/components/session/recording/StatusBanner.tsx
 'use client';
+
 import React from 'react';
 import defaultStyles from './StatusBanner.module.css'; // Styles local to StatusBanner
 
 interface StatusBannerProps {
   message?: string;
-  baseClass?: string;      // Prop for the main container class
-  successClass?: string;   // Prop for the success state class
-  errorClass?: string;     // Prop for the error state class
+  baseClass?: string;      // Optional override for main container class
+  successClass?: string;   // Optional override for success styling
+  errorClass?: string;     // Optional override for error styling
 }
 
-export function StatusBanner({
+export default function StatusBanner({
   message,
   baseClass,
   successClass,
@@ -22,17 +23,13 @@ export function StatusBanner({
     message.toLowerCase().includes('error') ||
     message.toLowerCase().includes('failed');
 
-  // Use passed-in classes, or fall back to defaults from StatusBanner.module.css
   const containerClass = baseClass || defaultStyles.container;
-  const conditionalClass = isError 
-    ? (errorClass || defaultStyles.error) 
+  const conditionalClass = isError
+    ? (errorClass || defaultStyles.error)
     : (successClass || defaultStyles.success);
 
   return (
-    <div
-      className={`${containerClass} ${conditionalClass}`}
-      role="status"
-    >
+    <div className={`${containerClass} ${conditionalClass}`} role="status">
       {message}
     </div>
   );

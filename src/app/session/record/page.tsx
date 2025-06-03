@@ -1,20 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { User as FirebaseUser } from 'firebase/auth';
+import { auth } from '@/lib/firebaseClient';
+import firebase from 'firebase/compat/app';
 
-// Hooks for recording & processing
-import { useAudioRecorder } from '@/hooks/useAudioRecorder';
-import { useAudioProcessor } from '@/hooks/useAudioProcessor';
-
-// UI components
-import { StatusBanner } from '@/components/session/StatusBanner';
-import { ProgressBar } from '@/components/session/ProgressBar';
+import StatusBanner from '@/components/session/recording/StatusBanner';
+import ProgressBar from '@/components/session/recording/ProgressBar';
 import Button from '@/components/Button';
 
-// Styles
+import { useAudioRecorder } from '@/hooks/useAudioRecorder';
+import { useAudioProcessor } from '@/hooks/useAudioProcessor';
+import { makeRandomId } from '@/utils/makeRandomId';
+
 import styles from './RecordSessionPage.module.css';
 
 function formatDuration(seconds: number) {
@@ -25,33 +24,19 @@ function formatDuration(seconds: number) {
 
 export default function RecordSessionPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [sessionId] = useState(() => {
+    const param = searchParams.get('sessionId');
+    return param && param.length > 0 ? param : makeRandomId(24);
+  });
 
-  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [user, setUser] = useState<firebase.User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
-  useEffect(() => {
-    let unsubscribe: () => void;
-
-    const setupAuth = async () => {
-      const { getAuth, onAuthStateChanged } = await import('firebase/auth');
-      const auth = getAuth();
-
-      unsubscribe = onAuthStateChanged(auth, (u) => {
-        if (u) {
-          setUser(u);
-        } else {
-          router.push('/login');
-        }
-        setAuthLoading(false);
-      });
-    };
-
-    setupAuth();
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, [router]);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<Date | null>(null);
+  const [didAutoProcess, setDidAutoProcess] = useState(false);
 
   const {
     isRecording,
@@ -70,14 +55,18 @@ export default function RecordSessionPage() {
     statusMessage: processorStatus,
   } = useAudioProcessor();
 
-  const displayStatus = isRecording
-    ? `Recording… (${formatDuration(recordingDuration)})`
-    : processorStatus || recorderStatus;
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((u) => {
+      if (u) {
+        setUser(u);
+      } else {
+        router.push('/login');
+      }
+      setAuthLoading(false);
+    });
 
-  const [hasStarted, setHasStarted] = useState(false);
-  const [startTime, setStartTime] = useState<Date | null>(null);
-  const [endTime, setEndTime] = useState<Date | null>(null);
-  const [didAutoProcess, setDidAutoProcess] = useState(false);
+    return () => unsubscribe();
+  }, [router]);
 
   const handleStart = () => {
     setHasStarted(true);
@@ -94,23 +83,19 @@ export default function RecordSessionPage() {
   useEffect(() => {
     if (!isRecording && audioBlob && user && !didAutoProcess) {
       setDidAutoProcess(true);
-      processAudio(audioBlob, user.uid, (success, _, noteId) => {
-        if (success) {
-          setTimeout(
-            () => router.push(noteId ? `/notes/${noteId}` : '/dashboard'),
-            1500
-          );
-        }
+      user.getIdToken().then((token) => {
+        processAudio(audioBlob, user.uid, sessionId, async (success, result, noteId, errorMsg) => {
+          if (success && result && noteId) {
+            console.log('✅ Saved therapySessionNote ID:', noteId);
+            router.push('/dashboard');
+          } else {
+            console.error('❌ Audio processing or save failed:', errorMsg);
+            setRecorderStatus('Audio processing failed. Please try again.');
+          }
+        }, token);
       });
     }
-  }, [
-    isRecording,
-    audioBlob,
-    user,
-    didAutoProcess,
-    processAudio,
-    router,
-  ]);
+  }, [isRecording, audioBlob, user, didAutoProcess, processAudio, router, sessionId, setRecorderStatus]);
 
   if (authLoading) {
     return (
@@ -143,7 +128,11 @@ export default function RecordSessionPage() {
         </div>
 
         <StatusBanner
-          message={displayStatus}
+          message={
+            isRecording
+              ? `Recording… (${formatDuration(recordingDuration)})`
+              : processorStatus || recorderStatus
+          }
           baseClass={styles.statusMessage}
           successClass={styles.statusSuccess}
           errorClass={styles.statusError}
@@ -180,7 +169,7 @@ export default function RecordSessionPage() {
               hour: '2-digit',
               minute: '2-digit',
             })}
-            &nbsp;(Duration {recordingDuration})
+            &nbsp;(Duration {formatDuration(recordingDuration)})
           </div>
         )}
 
