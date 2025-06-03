@@ -14,5 +14,9 @@ export async function transcribeAudio(file: File): Promise<string> {
   }
 
   const data = await response.json();
-  return data.text;
+  if (typeof data === 'object' && data !== null && 'text' in data) {
+    return (data as { text: string }).text;
+  } else {
+    throw new Error('Transcription response missing `text`');
+  }
 }
