@@ -1,5 +1,4 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -7,45 +6,66 @@ service cloud.firestore {
     // therapySessionNotes collection
     // -------------------------------
     match /therapySessionNotes/{noteId} {
-      // Create: only authenticated therapist, and all required fields must be correctly typed.
-      allow create: if request.auth != null
-                     && request.resource.data.therapistId == request.auth.uid
-                     && request.resource.data.structuredContent is string
-                     && request.resource.data.transcript is string
-                     && request.resource.data.sessionDate is timestamp
-                     && request.resource.data.createdAt is timestamp
-                     && request.resource.data.originalAudioFileName is string
-                     && request.resource.data.status is string;
+      // Create: only an authenticated therapist, and all required fields must be correctly typed.
+      // We do NOT require `structuredContent` at creation time here.
+      allow create: if
+        request.auth != null
+        // Must be writing your own document
+        && request.resource.data.therapistId == request.auth.uid
+        // transcript is a string
+        && request.resource.data.transcript is string
+        // sessionDate is a Firestore timestamp
+        && request.resource.data.sessionDate is timestamp
+        // createdAt can either be a literal timestamp or the serverTimestamp() sentinel
+        && (
+             request.resource.data.createdAt is timestamp
+             || request.resource.data.createdAt == request.time
+           )
+        // originalAudioFileName is a string
+        && request.resource.data.originalAudioFileName is string
+        // status is a string
+        && request.resource.data.status is string
+        // sessionId is a string
+        && request.resource.data.sessionId is string;
 
-      // Read: only the owning therapist
-      allow read: if request.auth != null
-                  && resource.data.therapistId == request.auth.uid;
+      // Read: only the owning therapist can read their own notes
+      allow read: if
+        request.auth != null
+        && resource.data.therapistId == request.auth.uid;
 
-      // Update: only the owning therapist, and therapistId is immutable
-      allow update: if request.auth != null
-                    && resource.data.therapistId == request.auth.uid
-                    && request.resource.data.therapistId == resource.data.therapistId
-                    // Optionally restrict which fields can be updated:
-                    && request.resource.data.structuredContent is string
-                    && request.resource.data.status is string
-                    && request.resource.data.sessionDate == resource.data.sessionDate
-                    && request.resource.data.originalAudioFileName == resource.data.originalAudioFileName;
+      // Update: only the owning therapist, and therapistId is immutable.
+      // We allow updating `status` and `structuredContent` only.
+      allow update: if
+        request.auth != null
+        && resource.data.therapistId == request.auth.uid                                // you own it
+        && request.resource.data.therapistId == resource.data.therapistId               // therapistId cannot change
+        // `status` must remain a string
+        && request.resource.data.status is string
+        // `structuredContent` must be a string
+        && request.resource.data.structuredContent is string
+        // The following fields must remain exactly as they were
+        && request.resource.data.transcript == resource.data.transcript
+        && request.resource.data.sessionDate == resource.data.sessionDate
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.originalAudioFileName == resource.data.originalAudioFileName
+        && request.resource.data.sessionId == resource.data.sessionId;
 
       // Delete: only the owning therapist
-      allow delete: if request.auth != null
-                    && resource.data.therapistId == request.auth.uid;
+      allow delete: if
+        request.auth != null
+        && resource.data.therapistId == request.auth.uid;
     }
 
     // -------------------------------
     // consentLogs collection
     // -------------------------------
     match /consentLogs/{logId} {
-      // Creates only via authenticated therapist; no reads/updates/deletes client-side.
-      allow create: if request.auth != null
-                     && request.resource.data.therapistId == request.auth.uid
-                     && request.resource.data.consentVersion is string
-                     && request.resource.data.timestamp is timestamp;
-
+      // Creates only via an authenticated therapist; no client-side reads/updates/deletes.
+      allow create: if
+        request.auth != null
+        && request.resource.data.therapistId == request.auth.uid
+        && request.resource.data.consentVersion is string
+        && request.resource.data.timestamp is timestamp;
       allow read, update, delete: if false;
     }
 
@@ -53,26 +73,26 @@ service cloud.firestore {
     // auditLogs collection
     // -------------------------------
     match /auditLogs/{logId} {
-      // Creates only via authenticated functions or therapists; no reads/updates/deletes.
-      allow create: if request.auth != null
-                     && request.resource.data.userId == request.auth.uid
-                     && request.resource.data.action is string
-                     && request.resource.data.timestamp is timestamp;
-
+      // Creates only via authenticated functions or therapists; no client-side reads/updates/deletes.
+      allow create: if
+        request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.action is string
+        && request.resource.data.timestamp is timestamp;
       allow read, update, delete: if false;
     }
 
     // -----------------------------------------
-    // (Optional) therapistProfiles collection
+    // therapistProfiles collection (optional)
     // -----------------------------------------
-    // If you have a collection for therapist metadata:
     match /therapistProfiles/{therapistId} {
       // Therapists can read/update their own profile
-      allow read, update: if request.auth != null
-                          && request.auth.uid == therapistId;
-      // Creation only via server-side (disable client create)
+      allow read, update: if
+        request.auth != null
+        && request.auth.uid == therapistId;
+      // Creation only via server (disable client create)
       allow create: if false;
-      // No deletes
+      // No client deletes
       allow delete: if false;
     }
 
