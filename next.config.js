@@ -1,9 +1,8 @@
+const path = require("path");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ✅ Instruct Next.js to produce a standalone build folder
   output: 'standalone',
-
-  // ✅ Configure any external image domains you need
   images: {
     remotePatterns: [
       {
@@ -14,8 +13,10 @@ const nextConfig = {
       },
     ],
   },
-
-  // 🚨 DO NOT include the webpack property anymore!
+  webpack: (config) => {
+    config.resolve.alias['@'] = path.resolve(__dirname, 'src');
+    return config;
+  },
 };
 
 module.exports = nextConfig;
