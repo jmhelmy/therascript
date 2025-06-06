@@ -10,7 +10,8 @@ out/
 functions/lib/
 functions/build/
 build/
-lib/
+functions/lib/
+!src/lib/
 standalone/
 functions/standalone/
 test-standalone/
