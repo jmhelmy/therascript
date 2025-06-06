@@ -2,13 +2,15 @@
   "name": "therascript",
   "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "postbuild": "echo 'Preparing functions/standalone for deployment...' && rm -rf functions/standalone && mkdir -p functions/standalone && echo 'Copying Next.js standalone output...' && cp -a .next/standalone/. functions/standalone/ && echo 'Copying public assets...' && ([ -d public ] && cp -a public/. functions/standalone/public/ || echo 'No public directory to copy.') && echo 'Copying credentials...' && ([ -f firebase-admin-creds.json ] && cp firebase-admin-creds.json functions/standalone/ || echo 'No credentials file.') && echo 'Preparation complete.'",
-    "build:prod": "env-cmd -f .env.production npm run build && npm run postbuild",
-    "start": "next start",
-    "deploy": "npm run build:prod && cd functions && npm run build && cd .. && firebase deploy --only functions:nextServer,hosting"
+ "scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "postbuild": "echo 'Preparing functions/standalone for deployment...' && rm -rf functions/standalone && mkdir -p functions/standalone && echo 'Copying Next.js standalone output...' && cp -a .next/standalone/. functions/standalone/ && echo 'Copying public assets...' && ([ -d public ] && cp -a public/. functions/standalone/public/ || echo 'No public directory to copy.') && echo 'Copying credentials...' && ([ -f firebase-admin-creds.json ] && cp firebase-admin-creds.json functions/standalone/ || echo 'No credentials file.') && echo 'Preparation complete.'",
+  "build:prod": "npm run build && npm run postbuild",
+  "start": "next start",
+  "deploy": "npm run build:prod && cd functions && npm run build && cd .. && firebase deploy --only functions:nextServer,hosting"
+}
+
   },
   "dependencies": {
     "clsx": "^2.1.0",
