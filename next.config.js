@@ -12,6 +12,7 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
+    unoptimized: true, // ✅ Disable server-side image optimization
   },
   webpack: (config, { isServer }) => {
     console.log('🧪 Webpack config loaded – checking alias for @');
@@ -40,9 +41,7 @@ const nextConfig = {
       });
     }
 
-    // 👇 THE ACTUAL FIX
     config.resolve.alias['@'] = path.join(__dirname, 'src');
-
     return config;
   },
 };
