@@ -2,22 +2,21 @@
 
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/auth';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ConsentPage() {
   const [isChecked, setIsChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
 
+  const { user, loading: authLoading } = useAuth();
+
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged(user => {
-      if (!user) router.push('/login');
-      setAuthLoading(false);
-    });
-    return () => unsub();
-  }, [router]);
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [authLoading, user, router]);
 
   const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
     setIsChecked(e.target.checked);
@@ -29,6 +28,11 @@ export default function ConsentPage() {
       setErrorMessage('Please confirm consent by checking the box.');
       return;
     }
+    if (!user) {
+      setErrorMessage('Authentication required to log consent.');
+      return;
+    }
+
     setIsLoading(true);
     setErrorMessage(null);
 
@@ -36,7 +40,7 @@ export default function ConsentPage() {
       const res = await fetch('/api/consent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ consentVersion: 'v1.0' }),
+        body: JSON.stringify({ consentVersion: 'v1.0', userId: user.uid }),
       });
       const json = await res.json();
       if (json.success) {
@@ -45,14 +49,19 @@ export default function ConsentPage() {
         throw new Error(json.message || 'Failed to log consent.');
       }
     } catch (err: any) {
-      setErrorMessage(err.message || 'An unexpected error occurred.');
+      console.error('Error logging consent:', err);
+      setErrorMessage(err.message || 'An unexpected error occurred while logging consent.');
     } finally {
       setIsLoading(false);
     }
   };
 
   if (authLoading) {
-    return <div>Loading user information…</div>;
+    return <div>Loading authentication status…</div>;
+  }
+
+  if (!user) {
+    return <div>Authentication required. Redirecting...</div>;
   }
 
   return (

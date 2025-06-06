@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
@@ -13,7 +13,7 @@ import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useAudioProcessor } from '@/hooks/useAudioProcessor';
 import { makeRandomId } from '@/utils/makeRandomId';
 
-import styles from './RecordSessionPage.module.css';
+import styles from '@/app/session/record/RecordSessionPage.module.css'; // Adjust path to styles
 
 function formatDuration(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -21,15 +21,7 @@ function formatDuration(seconds: number) {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
-export default function RecordSessionPageWrapper() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <RecordSessionPageContent />
-    </Suspense>
-  );
-}
-
-function RecordSessionPageContent() {
+export default function RecordSessionClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [sessionId] = useState(() => {
@@ -176,4 +168,4 @@ function RecordSessionPageContent() {
       </div>
     </div>
   );
-}
+} 

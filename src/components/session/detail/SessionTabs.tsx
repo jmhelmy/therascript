@@ -3,7 +3,7 @@
 
 import styles from "./SessionTabs.module.css";
 
-const TABS = ["SOAP Notes", "Transcript"];
+const TABS = ["Notes", "Transcript"];
 
 export default function SessionTabs({
   activeTab,

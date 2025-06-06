@@ -1,23 +1,28 @@
 'use client';
 
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
+// Remove compat imports
+// import firebase from 'firebase/compat/app';
+// import 'firebase/compat/auth';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './RegisterPage.module.css';
+import { auth } from '@/lib/firebaseClient';
+// Import modular createUserWithEmailAndPassword function
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
+// Remove redundant initialization
 // Initialize once (outside the component)
-if (!firebase.apps.length) {
-  firebase.initializeApp({
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
-  });
-}
-const auth = firebase.auth();
+// if (!firebase.apps.length) {
+//   firebase.initializeApp({
+//     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+//     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+//     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+//     storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+//     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+//     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+//   });
+// }
+// const auth = firebase.auth(); // Remove local auth instance
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -29,9 +34,11 @@ export default function RegisterPage() {
     e.preventDefault();
     setError(null);
     try {
-      await auth.createUserWithEmailAndPassword(email, password);
+      // Use the imported modular function, passing the auth instance
+      await createUserWithEmailAndPassword(auth, email, password);
       router.push('/legal');
     } catch (err: any) {
+      console.error('Registration error:', err);
       setError(err.message || 'Something went wrong.');
     }
   };

@@ -23,6 +23,7 @@ export default function DashboardContainer() {
 
       if (!currentUser) {
         router.push('/login');
+        setLoading(false);
         return;
       }
 
@@ -59,6 +60,7 @@ export default function DashboardContainer() {
 
       console.log('✅ Parsed sessions:', parsed);
       setSessions(parsed);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching sessions:', error);
       setError('Failed to load sessions');

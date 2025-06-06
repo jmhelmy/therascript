@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import styles from './RecordingControls.module.css';
-import { logConsent } from '@/utils/logConsent';
 
 interface RecordingControlsProps {
   isRecording: boolean;
@@ -19,8 +18,6 @@ export function RecordingControls({
   onStart,
   onStop,
 }: RecordingControlsProps) {
-  const [consentLoading, setConsentLoading] = useState(false);
-
   const format = (sec: number) => {
     const m = Math.floor(sec / 60);
     const s = String(Math.floor(sec % 60)).padStart(2, '0');
@@ -28,21 +25,11 @@ export function RecordingControls({
   };
 
   const handleStart = async () => {
-    setConsentLoading(true);
-    try {
-      // Log therapist consent before recording
-      await logConsent('v1.0');
-      onStart();
-    } catch (err) {
-      console.error('Consent logging failed:', err);
-      alert('Could not log consent. Please try again.');
-    } finally {
-      setConsentLoading(false);
-    }
+    onStart();
   };
 
   const handleClick = isRecording ? onStop : handleStart;
-  const disabled = isProcessing || (!isRecording && consentLoading);
+  const disabled = isProcessing || isRecording;
 
   return (
     <div className={styles.wrapper}>
@@ -53,8 +40,8 @@ export function RecordingControls({
       >
         {isRecording
           ? 'Stop Recording'
-          : consentLoading
-          ? 'Logging Consent…'
+          : isProcessing
+          ? 'Processing…'
           : 'Start Recording'}
       </button>
       <span className={styles.timer}>

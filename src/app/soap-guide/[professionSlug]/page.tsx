@@ -6,51 +6,39 @@ import Link from 'next/link';
 import { usePathname, notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header/Header';
 import { Footer } from '@/components/layout/Footer';
-import styles from '../SoapPage.module.css'; // Adjust path if needed
-import { guideCategories, GuideCategory } from '../data';
+import styles from '../SoapPage.module.css';
+import { guideCategories, GuideCategory, Subtopic } from '../data';
 
-// Interface for route params
-interface ResolvedProfessionParams {
-  professionSlug: string;
-}
+export default function ProfessionGuidePage(props: any) {
+  const { professionSlug } = (props.params as { professionSlug: string });
 
-interface ProfessionPageProps {
-  params: ResolvedProfessionParams;
-}
-
-// Helper to lazy-load a profession overview component by name
-const loadProfessionComponent = (componentName?: string): ComponentType<any> | null => {
-  if (!componentName) return null;
-  try {
-    return lazy(() => import(`../_profession-content/${componentName}`));
-  } catch (error) {
-    console.error(`Failed to load component ${componentName}:`, error);
-    return null;
-  }
-};
-
-export default function ProfessionGuidePage({ params }: ProfessionPageProps) {
-  // Destructure params directly (no more 'use()' call)
-  const { professionSlug } = params;
-
-  const pathname = usePathname();
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const pathname = usePathname();
 
   // Find the matching category object from your data
   const currentProfession = guideCategories.find(
     (cat) => cat.slug === professionSlug && cat.isGroup
   ) as GuideCategory | undefined;
 
-  // If not found, render Next.js 404
   if (!currentProfession) {
     notFound();
     return null;
   }
 
-  // Lazy-load the overview component, if one was specified
+  // Helper to lazy‐load the profession’s overview component
+  const loadProfessionComponent = (componentName?: string): ComponentType<any> | null => {
+    if (!componentName) return null;
+    try {
+      // One dot (../) because this file is in:
+      // src/app/soap-guide/[professionSlug]/page.tsx
+      return lazy(() => import(`../_profession-content/${componentName}`));
+    } catch {
+      return null;
+    }
+  };
+
   const ContentComponent = loadProfessionComponent(currentProfession.overviewComponent);
 
-  // Automatically expand this profession group in the sidebar
   useEffect(() => {
     setExpandedGroups((prev) => ({ ...prev, [professionSlug]: true }));
   }, [professionSlug]);
@@ -59,7 +47,6 @@ export default function ProfessionGuidePage({ params }: ProfessionPageProps) {
     setExpandedGroups((prev) => ({ ...prev, [slug]: !prev[slug] }));
   };
 
-  // For sidebar link highlighting
   const currentActiveGroupSlug = professionSlug;
 
   return (
@@ -78,8 +65,7 @@ export default function ProfessionGuidePage({ params }: ProfessionPageProps) {
                       currentActiveGroupSlug === category.slug ? styles.navLinkActive : ''
                     }`}
                     onClick={(e) => {
-                      if (category.isGroup && category.subtopics && category.subtopics.length > 0) {
-                        // Prevent navigation so we can just toggle the group
+                      if (category.isGroup && category.subtopics && category.subtopics.length) {
                         e.preventDefault();
                         toggleGroup(category.slug);
                       }

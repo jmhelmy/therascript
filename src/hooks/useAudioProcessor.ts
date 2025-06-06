@@ -1,8 +1,6 @@
-// src/hooks/useAudioProcessor.ts
 'use client';
 
 import { useState } from 'react';
-import { auth } from '@/lib/firebaseConfig';               // ← your initialized Firebase Auth
 import { saveTherapySessionNote } from '@/lib/saveTherapySessionNote';
 
 type SoapNote = {
@@ -22,16 +20,10 @@ export const useAudioProcessor = () => {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [statusMessage, setStatusMessage] = useState<string>('');
 
-  /**
-   * processAudio()
-   *  1. Sends the Blob to Whisper (EC2) for transcription
-   *  2. Sends the transcript to your /api/generate-soap-note route
-   *  3. Persists both transcript + SOAP note to Firestore
-   */
   const processAudio = async (
     audioBlob: Blob,
-    therapistId: string,
-    sessionId?: string, 
+    userId: string,
+    sessionId?: string,
     onComplete?: (
       success: boolean,
       result?: AudioResult,
@@ -39,7 +31,6 @@ export const useAudioProcessor = () => {
       errorMessage?: string
     ) => void
   ) => {
-    // ─── Input validation ───────────────────────────────────────────────
     if (!audioBlob) {
       const err = 'Processing failed: audioBlob is missing.';
       console.error(err);
@@ -47,13 +38,7 @@ export const useAudioProcessor = () => {
       onComplete?.(false, undefined, null, err);
       return;
     }
-    if (!therapistId) {
-      const err = 'Processing failed: therapistId is missing.';
-      console.error(err);
-      setStatusMessage(err);
-      onComplete?.(false, undefined, null, err);
-      return;
-    }
+
     if (!sessionId) {
       const err = 'Processing failed: sessionId is missing or invalid.';
       console.error(err);
@@ -62,30 +47,29 @@ export const useAudioProcessor = () => {
       return;
     }
 
-    // ─── Begin processing ───────────────────────────────────────────────
     setIsProcessing(true);
     setUploadProgress(0);
     setStatusMessage('Sending audio to transcriber…');
 
     try {
-      // 1️⃣ Wrap the Blob in a File so we have a .name property
       const defaultFileName = 'session-audio.mp3';
       const file = new File([audioBlob], defaultFileName, { type: audioBlob.type });
 
       console.log('📤 Uploading to Whisper with file.name:', file.name);
       setUploadProgress(10);
 
-      // 2️⃣ Send to Whisper for transcription
       const formData = new FormData();
       formData.append('file', file);
 
-      const whisperResponse = await fetch(
-        'http://ec2-18-219-113-46.us-east-2.compute.amazonaws.com:8000/transcribe',
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
+      const whisperBaseUrl = process.env.NEXT_PUBLIC_WHISPER_API_URL;
+      if (!whisperBaseUrl) {
+        throw new Error('Whisper API URL is not defined in environment variables.');
+      }
+
+      const whisperResponse = await fetch(`${whisperBaseUrl}/transcribe`, {
+        method: 'POST',
+        body: formData,
+      });
 
       if (!whisperResponse.ok) {
         const errText = await whisperResponse.text();
@@ -99,7 +83,6 @@ export const useAudioProcessor = () => {
       setStatusMessage('Transcript received. Sending to OpenAI…');
       setUploadProgress(40);
 
-      // 3️⃣ Send transcript to /api/generate-soap-note for SOAP generation
       const aiResponse = await fetch('/api/generate-soap-note', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -118,24 +101,16 @@ export const useAudioProcessor = () => {
       setStatusMessage('Saving transcript and SOAP note…');
       setUploadProgress(70);
 
-      // 4️⃣ Check that the user is still authenticated
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        throw new Error('No authenticated user. Please log in again.');
-      }
-
-      // 5️⃣ Build a safe filename (never undefined)
-      //    If file.name somehow were undefined, fallback to defaultFileName:
       const safeFilename = file.name ?? defaultFileName;
       console.log('▶️ Final originalAudioFileName to write:', safeFilename);
 
-      // 6️⃣ Write to Firestore
       const noteId = await saveTherapySessionNote(
+        userId,
         transcript,
         soapNote,
         new Date(),
-        safeFilename,  // ✅ guaranteed to be a non‐undefined string
-        sessionId     // must be a real string
+        safeFilename,
+        sessionId
       );
 
       console.log('✅ Therapy session note saved with ID:', noteId);

@@ -1,35 +1,20 @@
 // src/lib/firebaseClient.ts
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
-import 'firebase/compat/firestore';
+import { initializeApp, getApps } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
-// Hardcoded config for testing
 const firebaseConfig = {
-  apiKey: "AIzaSyDxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXx",  // Replace with your actual API key
-  authDomain: "therascript-45b62.firebaseapp.com",
-  projectId: "therascript-45b62",
-  storageBucket: "therascript-45b62.appspot.com",
-  messagingSenderId: "64757237031",  // Replace with your actual sender ID
-  appId: "1:64757237031:web:c541b0cf649c0d88fb5502"  // Replace with your actual app ID
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 
-// Only initialize once, even if this file is imported multiple times
-if (!firebase.apps.length) {
-  console.log('Initializing Firebase client with config:', {
-    ...firebaseConfig,
-    apiKey: firebaseConfig.apiKey.substring(0, 10) + '...' // Only log part of the API key
-  });
-  firebase.initializeApp(firebaseConfig);
+console.log("🔥 Firebase config being used:", firebaseConfig); // ✅ move this AFTER the definition
 
-  // Connect to emulators in development
-  if (process.env.NEXT_PUBLIC_USE_EMULATORS === 'true') {
-    console.log('🔧 Connecting to Firebase emulators');
-    firebase.auth().useEmulator('http://127.0.0.1:9099');
-    firebase.firestore().useEmulator('127.0.0.1', 8080);
-  }
-}
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
-// Export auth() and firestore() for convenience
-export const auth = firebase.auth();
-export const firestore = firebase.firestore();
-export default firebase;
+export const auth = getAuth(app);
+export const firestore = getFirestore(app);

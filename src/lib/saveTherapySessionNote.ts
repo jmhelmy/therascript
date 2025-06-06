@@ -1,11 +1,18 @@
 // src/lib/saveTherapySessionNote.ts
 
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
-import 'firebase/compat/firestore';
+// Remove compat imports
+// import firebase from 'firebase/compat/app';
+// import 'firebase/compat/auth';
+// import 'firebase/compat/firestore';
 
-const Timestamp = firebase.firestore.Timestamp;
-const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp;
+// Import firestore and other necessary modules from firebaseClient.ts
+import { firestore } from '@/lib/firebaseClient';
+// Import modular Firestore functions, including serverTimestamp
+import { Timestamp, FieldValue, serverTimestamp, collection, doc, setDoc } from 'firebase/firestore'; // Add setDoc import
+
+// Re-declare Timestamp and serverTimestamp if needed, using modular imports
+// const Timestamp = firebase.firestore.Timestamp;
+// const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp;
 
 export interface SoapNote {
   subjective: string;
@@ -15,9 +22,9 @@ export interface SoapNote {
 }
 
 export interface TherapySessionNoteData {
-  therapistId: string;
-  createdAt: firebase.firestore.FieldValue;
-  sessionDate: firebase.firestore.Timestamp;
+  therapistId: string; // This will now come from the argument
+  createdAt: FieldValue; // Use modular FieldValue type
+  sessionDate: Timestamp; // Use modular Timestamp type
   transcript: string;
   soapNote: SoapNote;
   originalAudioFileName: string;
@@ -26,27 +33,28 @@ export interface TherapySessionNoteData {
   structuredContent: string;
 }
 
+// Accept userId as an argument
 export async function saveTherapySessionNote(
+  userId: string, // Add userId parameter
   transcript: string,
   soapNote: SoapNote,
   sessionDate: Date,
   originalAudioFileName: string,
   sessionId: string // ← must be a non‐null string
 ): Promise<string> {
-  const auth = firebase.auth();
-  const firestore = firebase.firestore();
-  const user = auth.currentUser;
+  // Remove internal auth access and user check
+  // const auth = firebase.auth();
+  // const firestore = firebase.firestore(); // Remove direct call to firebase.firestore()
+  // const user = auth.currentUser;
 
-  if (!user) {
-    console.error('User not authenticated. Cannot save note.');
-    throw new Error('User not authenticated. Please log in again.');
-  }
+  // Remove user check
+  // if (!user) { ... }
 
   // Build the exact object that matches your Firestore rules:
   const noteData: TherapySessionNoteData = {
-    therapistId: user.uid,
-    createdAt: serverTimestamp(),
-    sessionDate: Timestamp.fromDate(sessionDate),
+    therapistId: userId, // Use the userId argument
+    createdAt: serverTimestamp(), // Use the imported modular serverTimestamp function
+    sessionDate: Timestamp.fromDate(sessionDate), // Use modular Timestamp
     transcript,
     soapNote,
     structuredContent: '', // <-- this satisfies Firestore rules
@@ -70,9 +78,11 @@ export async function saveTherapySessionNote(
   // ───────────────────────────────────────────────
 
   try {
-    // Use .doc().set(...) so Firestore does not perform an implicit read (which your rules block).
-    const docRef = firestore.collection('therapySessionNotes').doc();
-    await docRef.set(noteData);
+    // Use the imported firestore instance
+    // The .collection() method exists on the Firestore instance.
+    // Use the modular collection and doc functions
+    const docRef = doc(collection(firestore, 'therapySessionNotes'));
+    await setDoc(docRef, noteData); // Use setDoc instead of docRef.set()
 
     console.log('✅ Therapy session note saved with ID:', docRef.id);
     return docRef.id;
