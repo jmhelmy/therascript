@@ -1,0 +1,19 @@
+lib
+├── adminSdk.js
+├── common
+│   └── adminSdk.js
+├── generateNote.js
+├── index.js
+├── logClientConsent.js
+├── services
+│   ├── azureOpenAIService.js
+│   ├── azureSpeech.js
+│   ├── azureSpeechService.js
+│   ├── firestoreService.js
+│   ├── storage.js
+│   └── transcoder.js
+├── types.js
+└── utils
+    └── authenticate.js
+
+4 directories, 13 files

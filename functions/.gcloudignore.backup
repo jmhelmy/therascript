@@ -1,0 +1,8 @@
+# Ignore node_modules and build artifacts of your functions code
+node_modules/
+lib/
+*.log
+
+# But DO NOT ignore standalone/.next (so Firebase uploads it)
+!standalone/.next
+
