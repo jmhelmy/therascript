@@ -1,0 +1,56 @@
+# .github/workflows/deploy.yml
+name: Deploy to Firebase
+
+# This workflow runs on every push to your 'main' branch
+on:
+  push:
+    branches:
+      - main  # Important: Change to 'master' if that's your default branch name
+
+jobs:
+  build_and_deploy:
+    # Use the latest version of Ubuntu for the virtual machine
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out your repository code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Match your Firebase Functions runtime
+          cache: 'npm'
+
+      # Step 3: Install dependencies for the root Next.js project
+      - name: Install Root Dependencies
+        run: npm install
+
+      # Step 4: Install dependencies for the functions directory
+      - name: Install Functions Dependencies
+        run: cd functions && npm install && cd ..
+
+      # Step 5: Run the full production build and preparation script
+      # This runs `next build` and your `postbuild` script to create functions/standalone
+      - name: Build and Prepare Project
+        run: npm run build:prod
+        env:
+          CI: false # Prevents warnings from being treated as errors
+          # Add any necessary production environment variables here if they are not committed
+          # Example:
+          # FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+
+      # Step 6: Run the TypeScript build for the functions wrapper
+      - name: Build Functions Wrapper
+        run: cd functions && npm run build && cd ..
+
+      # Step 7: Deploy to Firebase using the Service Account Key
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only functions,hosting --project therascript-45b62
+        env:
+          # Use the service account key you stored in GitHub Secrets
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_THERASCRIPT_45B62 }}
