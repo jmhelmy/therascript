@@ -14,6 +14,7 @@ const nextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
+    console.log('🧪 Webpack config loaded – checking alias for @');
     console.log('SIMPLIFIED WEBPACK CONFIG IS RUNNING! isServer:', isServer);
 
     if (!isServer) {
