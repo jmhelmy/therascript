@@ -1,0 +1,13 @@
+{
+    "indexes": [
+      {
+        "collectionId": "therapySessionNotes",
+        "fields": [
+          { "fieldPath": "therapistId", "order": "ASCENDING" },
+          { "fieldPath": "createdAt", "order": "DESCENDING" }
+        ]
+      }
+    ],
+    "fieldOverrides": []
+  }
+  
