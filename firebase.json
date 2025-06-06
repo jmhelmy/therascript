@@ -45,5 +45,11 @@
       "enabled": true,
       "port": 4000
     }
+  },
+  "frameworksBackend": {
+    "skipFrameworkDeployment": true
+  },
+  "experimental": {
+    "skipFrameworkInference": true
   }
 }
