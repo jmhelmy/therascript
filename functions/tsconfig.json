@@ -1,21 +1,15 @@
 {
   "compilerOptions": {
-    "target": "ES2021",
+    "target": "es2022",
     "module": "commonjs",
-    "moduleResolution": "node",
-    "lib": ["ES2021"],
-    "outDir": "lib",
     "rootDir": "src",
+    "outDir": "lib",
     "strict": true,
     "esModuleInterop": true,
+    "allowJs": true,          // ← allow .js imports
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "*": ["node_modules/*"]
-    }
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "lib"]
+  "include": ["src/**/*.ts", "src/**/*.js"],
+  "exclude": ["node_modules", "lib", "standalone"]
 }

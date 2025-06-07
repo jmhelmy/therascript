@@ -1,3 +1,5 @@
+// functions/src/services/whisperService.ts
+
 import fetch from 'node-fetch';
 import * as admin from 'firebase-admin';
 import FormData from 'form-data';
@@ -16,7 +18,9 @@ export async function transcribeWithWhisper(firebasePath: string): Promise<strin
     functions.logger.info(`whisperService: downloaded ${buffer.length} bytes`);
   } catch (err: unknown) {
     functions.logger.error(`whisperService: failed to download "${firebasePath}"`, err);
-    throw new Error(`Failed to download audio: ${err instanceof Error ? err.message : String(err)}`);
+    throw new Error(
+      `Failed to download audio: ${err instanceof Error ? err.message : String(err)}`
+    );
   }
 
   const form = new FormData();
@@ -41,7 +45,9 @@ export async function transcribeWithWhisper(firebasePath: string): Promise<strin
     );
     clearTimeout(timeout);
 
-    functions.logger.info(`whisperService: remote API responded with status ${response.status}`);
+    functions.logger.info(
+      `whisperService: remote API responded with status ${response.status}`
+    );
     if (!response.ok) {
       const errorBody = await response.text().catch(() => '<no body>');
       functions.logger.error(
@@ -50,8 +56,10 @@ export async function transcribeWithWhisper(firebasePath: string): Promise<strin
       throw new Error(`Whisper API failed (status ${response.status})`);
     }
 
-    const data = await response.json().catch((err) => {
-      throw new Error(`JSON parse error: ${err instanceof Error ? err.message : String(err)}`);
+    const data = await response.json().catch((err: any) => {
+      throw new Error(
+        `JSON parse error: ${err instanceof Error ? err.message : String(err)}`
+      );
     });
 
     if (!data || typeof data.text !== 'string') {
@@ -59,7 +67,10 @@ export async function transcribeWithWhisper(firebasePath: string): Promise<strin
       throw new Error(`Unexpected response from Whisper: ${JSON.stringify(data)}`);
     }
 
-    functions.logger.info('whisperService: transcription succeeded', { length: data.text.length });
+    functions.logger.info(
+      'whisperService: transcription succeeded',
+      { length: data.text.length }
+    );
     return data.text;
   } catch (err: unknown) {
     if (err instanceof Error && err.name === 'AbortError') {
@@ -67,6 +78,8 @@ export async function transcribeWithWhisper(firebasePath: string): Promise<strin
       throw new Error('Whisper API request timed out after 15 s');
     }
     functions.logger.error('whisperService: transcription error', err);
-    throw new Error(`Whisper transcription failed: ${err instanceof Error ? err.message : String(err)}`);
+    throw new Error(
+      `Whisper transcription failed: ${err instanceof Error ? err.message : String(err)}`
+    );
   }
 }
