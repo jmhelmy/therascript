@@ -1,4 +1,6 @@
 // src/app/api/sessions/route.ts
+export const dynamic = 'force-dynamic'; // <--- THIS LINE IS CRUCIAL FOR DYNAMIC ROUTES
+
 import { NextRequest, NextResponse } from 'next/server';
 import { authAdmin, dbAdmin } from '@/lib/adminFirebase';
 

@@ -1,11 +1,12 @@
 // app/api/generate-soap-note/route.ts
+export const dynamic = 'force-dynamic'; // <--- THIS LINE IS CRUCIAL FOR DYNAMIC ROUTES
 
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
-  baseURL: `${process.env.OPENAI_ENDPOINT}/openai/deployments/${process.env.OPENAI_DEPLOYMENT}`,
+  baseURL: `<span class="math-inline">\{process\.env\.OPENAI\_ENDPOINT\}/openai/deployments/</span>{process.env.OPENAI_DEPLOYMENT}`,
   defaultHeaders: {
     'api-key': process.env.OPENAI_API_KEY!,
   },
