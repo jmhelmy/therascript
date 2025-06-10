@@ -10,7 +10,7 @@ interface MobileNavigationProps {
   isOpen: boolean;
   toggleMenu: () => void;       // For overlay click & close button
   onLinkClick: () => void;      // For navigation links, ensures all menus close
-  menuRef: React.RefObject<HTMLDivElement>;
+  menuRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export function MobileNavigation({

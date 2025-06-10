@@ -7,10 +7,10 @@ import styles from './Header.module.css';
 interface DesktopNavigationProps {
   isCompanyDropdownOpen: boolean;
   toggleCompanyDropdown: () => void;
-  companyDropdownRef: React.RefObject<HTMLDivElement>;
+  companyDropdownRef: React.RefObject<HTMLDivElement | null>;
   isSolutionsDropdownOpen: boolean;
   toggleSolutionsDropdown: () => void;
-  solutionsDropdownRef: React.RefObject<HTMLDivElement>;
+  solutionsDropdownRef: React.RefObject<HTMLDivElement | null>;
   onLinkClick: () => void; // Handles closing all menus on navigation
 }
 
